@@ -23,7 +23,7 @@ export default function CustomMedia(){
             const peerConfig = {
                 // debug: 1,
                 host: "test.roshanbhatta.com.np",
-                port: 9000,
+                port: 443,
                 path: "/myapp",
                 secure: true,
                 key: "peerjs",
