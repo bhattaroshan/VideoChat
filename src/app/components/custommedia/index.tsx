@@ -5,6 +5,7 @@ import Peer from "peerjs";
 const peer = new Peer();
 
 export default function CustomMedia(){
+    if(typeof window === undefined) return;
     // const [stream,setStream] = useState<MediaStream|null>(null);
     const meRef = useRef<HTMLVideoElement|null>(null);
     const remoteRef = useRef<HTMLVideoElement|null>(null);
@@ -23,16 +24,21 @@ export default function CustomMedia(){
         
         peer.on('call', async (call) => {
             console.log("calling...")
-            stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true },);
-            if(meRef.current){
-                meRef.current.srcObject = stream;
-            }
-              call.answer(stream)
-              call.on('stream', function(remoteStream) {
-                if(remoteRef.current){
-                    remoteRef.current.srcObject = remoteStream
+            try{
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true },);
+                if(meRef.current){
+                    meRef.current.srcObject = stream;
                 }
-            });
+                  call.answer(stream)
+                  call.on('stream', function(remoteStream) {
+                    if(remoteRef.current){
+                        remoteRef.current.srcObject = remoteStream
+                    }
+                });
+            }catch(error){
+                console.log(error);
+            }
+           
           })
 
           return ()=>{
@@ -42,31 +48,35 @@ export default function CustomMedia(){
           }
     },[])
 
-    // const call = async (remotePeerId:string) => {
+    const call = async (remotePeerId:string) => {
+        let stream:MediaStream;
+       try{
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        if(meRef.current){
+          meRef.current.srcObject = stream;
+        }
+    
+    
+        const call = peer.call(remotePeerId,stream);
+        call.on('stream',async (remoteStream)=>{
+            if(remoteRef.current){
+                remoteRef.current.srcObject = remoteStream;
+            }
+        })
+       } catch(error){
+            console.log(error);
+       }
         
-    //     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    //     if(meRef.current){
-    //       meRef.current.srcObject = stream;
-    //     }
-    
-    
-    //     const call = peer.call(remotePeerId,stream);
-    //     call.on('stream',async (remoteStream)=>{
-    //         if(remoteRef.current){
-    //             remoteRef.current.srcObject = remoteStream;
-    //         }
-    //     })
-       
-    //     return ()=>{
-    //         if(stream){
-    //             stream.getTracks().forEach(track=>track.stop);
-    //         }
-    //     }
-    //   }
+        return ()=>{
+            if(stream){
+                stream.getTracks().forEach(track=>track.stop);
+            }
+        }
+      }
 
       function handleConnect(){
         if(textRef.current){
-            // call(textRef.current.value);
+            call(textRef.current.value);
         }
       }
 
