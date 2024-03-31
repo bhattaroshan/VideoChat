@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useRef, useState } from "react"
 // import Peer from "peerjs";
-
+import {v4 as uuidv4} from 'uuid';
 
 export default function CustomMedia(){
     // const [stream,setStream] = useState<MediaStream|null>(null);
@@ -21,12 +21,13 @@ export default function CustomMedia(){
         async function connectPeer(){
             const peerJS = await import('peerjs');
             const peerConfig = {
-                // debug: 1,
-                host: "test.roshanbhatta.com.np",
+                debug: 1,
+                host: "crosshimalaya.roshanbhatta.com.np",
                 port: 443,
+                // port: 9000,
                 path: "/myapp",
                 secure: true,
-                key: "peerjs",
+                // key: "peerjs",
                 // config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] }, // Replace with your own server URLs
             };
 
