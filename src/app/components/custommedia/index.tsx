@@ -14,10 +14,13 @@ export default function CustomMedia(){
     const textRef = useRef<HTMLInputElement>(null);
     const [myId,setMyId] = useState('');
     const peerInstance = useRef<any>(null);
+
     const [state,setState] = useState<MediaStream|null>(null);
+    const [remoteState,setRemoteState] = useState<MediaStream|null>(null);
 
     const [cameraOn,setCameraOn] = useState(true);
     const [micOn,setMicOn] = useState(true);
+    
 
     useEffect(()=>{
         
@@ -84,7 +87,8 @@ export default function CustomMedia(){
         if(meRef.current){
           meRef.current.srcObject = stream;
         }
-    
+        
+        setRemoteState(stream);
         const call = peerInstance.current?.call(remotePeerId,stream);
         if(call){
             call.on('stream',async (remoteStream:any)=>{
@@ -117,11 +121,27 @@ export default function CustomMedia(){
       }
 
     function handleCameraClick(){
-        setCameraOn(p=>!p);
+        if(state){
+            state.getVideoTracks()[0].enabled = !cameraOn;
+            setCameraOn(p=>!p);
+        }
+
+        if(remoteState){
+            remoteState.getVideoTracks()[0].enabled = !cameraOn;
+            setCameraOn(p=>!p);
+        }
     }
 
     function handleMicClick(){
-        setMicOn(p=>!p);
+        if(state){
+            state.getAudioTracks()[0].enabled = !micOn;
+            setMicOn(p=>!p);
+        }
+
+        if(remoteState){
+            remoteState.getAudioTracks()[0].enabled = !micOn;
+            setMicOn(p=>!p);
+        }
     }
 
     return <div className='flex flex-col gap-4 items-center w-screen h-screen'>
@@ -162,7 +182,6 @@ export default function CustomMedia(){
             <div className='flex gap-4 w-screen md:w-6/12'>
                 <input type='text' ref={textRef} className='border rounded'/>
                 <button className='bg-blue-400 text-white p-2' onClick={handleConnect}>Connect</button>
-                <button className='bg-blue-400 text-white p-2' onClick={handleVideo}>Toggle video</button>
             </div>
     </div>
 }
