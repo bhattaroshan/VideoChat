@@ -25,7 +25,7 @@ export default function CustomMedia(){
                 host: "test.roshanbhatta.com.np",
                 port: 9000,
                 path: "/myapp",
-                secure: false,
+                secure: true,
                 key: "peerjs",
                 // config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] }, // Replace with your own server URLs
             };
