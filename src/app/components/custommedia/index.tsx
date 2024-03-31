@@ -22,7 +22,7 @@ export default function CustomMedia(){
             const peerJS = await import('peerjs');
             const peerConfig = {
                 // debug: 1,
-                host: process.env.NEXT_PUBLIC_HOST,
+                host: "test.roshanbhatta.com.np",
                 port: 9000,
                 path: "/myapp",
                 secure: false,
