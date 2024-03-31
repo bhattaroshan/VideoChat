@@ -2,7 +2,6 @@
 import { useEffect, useRef, useState } from "react"
 import Peer from "peerjs";
 
-const peer = new Peer();
 
 export default function CustomMedia(){
     // const [stream,setStream] = useState<MediaStream|null>(null);
@@ -12,8 +11,10 @@ export default function CustomMedia(){
     const [peerId, setPeerId] = useState('');
     const peerInstance = useRef<Peer>(null);
     const [myId,setMyId] = useState('');
+    let peer:Peer;
 
     useEffect(()=>{
+        peer = new Peer();
         let stream:MediaStream;
         peer.on('open', (id) => {
           setPeerId(id)
