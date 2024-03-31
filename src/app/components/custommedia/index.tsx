@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react"
 import Peer from "peerjs";
 
+const peer = new Peer();
 
 export default function CustomMedia(){
     // const [stream,setStream] = useState<MediaStream|null>(null);
@@ -11,10 +12,8 @@ export default function CustomMedia(){
     const [peerId, setPeerId] = useState('');
     const peerInstance = useRef<Peer>(null);
     const [myId,setMyId] = useState('');
-    let peer:Peer;
 
     useEffect(()=>{
-        peer = new Peer();
         let stream:MediaStream;
         peer.on('open', (id) => {
           setPeerId(id)
@@ -43,31 +42,31 @@ export default function CustomMedia(){
           }
     },[])
 
-    const call = async (remotePeerId:string) => {
+    // const call = async (remotePeerId:string) => {
         
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        if(meRef.current){
-          meRef.current.srcObject = stream;
-        }
+    //     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    //     if(meRef.current){
+    //       meRef.current.srcObject = stream;
+    //     }
     
     
-        const call = peer.call(remotePeerId,stream);
-        call.on('stream',async (remoteStream)=>{
-            if(remoteRef.current){
-                remoteRef.current.srcObject = remoteStream;
-            }
-        })
+    //     const call = peer.call(remotePeerId,stream);
+    //     call.on('stream',async (remoteStream)=>{
+    //         if(remoteRef.current){
+    //             remoteRef.current.srcObject = remoteStream;
+    //         }
+    //     })
        
-        return ()=>{
-            if(stream){
-                stream.getTracks().forEach(track=>track.stop);
-            }
-        }
-      }
+    //     return ()=>{
+    //         if(stream){
+    //             stream.getTracks().forEach(track=>track.stop);
+    //         }
+    //     }
+    //   }
 
       function handleConnect(){
         if(textRef.current){
-            call(textRef.current.value);
+            // call(textRef.current.value);
         }
       }
 
