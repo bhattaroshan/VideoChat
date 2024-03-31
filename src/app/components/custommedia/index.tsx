@@ -115,7 +115,7 @@ export default function CustomMedia(){
     return <div className='flex flex-col w-screen h-screen justify-center items-center gap-4'>
             <p>{myId}</p>
             <div className='flex flex-col gap-4'>
-                <video ref={meRef} autoPlay className='rounded-xl bg-blue-200 w-40 h-40 object-cover'/>
+                <video ref={meRef} autoPlay muted={true} className='rounded-xl bg-blue-200 w-40 h-40 object-cover'/>
                 <video ref={remoteRef} autoPlay className='rounded-xl bg-blue-200 w-40 h-40 object-cover' />
             </div>
 
