@@ -8,47 +8,65 @@ export default function CustomMedia(){
     const meRef = useRef<HTMLVideoElement|null>(null);
     const remoteRef = useRef<HTMLVideoElement|null>(null);
     const textRef = useRef<HTMLInputElement>(null);
-    const [peerId, setPeerId] = useState('');
+    // const [peerId, setPeerId] = useState('');
     const [myId,setMyId] = useState('');
     const peerInstance = useRef<any>(null);
+    const [enableVideo,setEnableVideo] =useState(true);
+    const [state,setState] = useState<MediaStream|null>(null);
 
     useEffect(()=>{
-        import('peerjs').then(({ default: Peer }) => {
-        const peer = new Peer();
+        
         let stream:MediaStream;
 
-        peer.on('open', (id) => {
-          setPeerId(id)
-          console.log(id);
-          setMyId(id);
-        });
-        
-        peer.on('call', async (call) => {
-            console.log("calling...")
-            try{
-                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true },);
-                if(meRef.current){
-                    meRef.current.srcObject = stream;
-                }
-                  call.answer(stream)
-                  call.on('stream', function(remoteStream) {
-                    if(remoteRef.current){
-                        remoteRef.current.srcObject = remoteStream
+        async function connectPeer(){
+            const peerJS = await import('peerjs');
+            const peerConfig = {
+                // debug: 1,
+                host: process.env.NEXT_PUBLIC_HOST,
+                port: 9000,
+                path: "/myapp",
+                secure: false,
+                key: "peerjs",
+                // config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] }, // Replace with your own server URLs
+            };
+
+            const peer = new peerJS.default(peerConfig);
+    
+            peer.on('open', (id) => {
+            //   setPeerId(id)
+              console.log(id);
+              setMyId(id);
+            });
+            
+            peer.on('call', async (call) => {
+                console.log("calling...")
+                try{
+                    stream = await navigator.mediaDevices.getUserMedia({ video: enableVideo, audio: true });
+                    setState(stream);
+                    if(meRef.current){
+                        meRef.current.srcObject = stream;
                     }
-                });
-            }catch(error){
-                console.log(error);
-            }
-           
-          })
-          peerInstance.current = peer;
-        
+                      call.answer(stream)
+                      call.on('stream', function(remoteStream) {
+                        if(remoteRef.current){
+                            remoteRef.current.srcObject = remoteStream
+                        }
+                    });
+                }catch(error){
+                    console.log(error);
+                }
+               
+              })
+              peerInstance.current = peer;
+        }
+       
+        connectPeer();
+
           return ()=>{
             if(stream){
                 stream.getTracks().forEach(track=>track.stop());
             }
           }
-        })
         
     },[])
 
@@ -61,9 +79,6 @@ export default function CustomMedia(){
           meRef.current.srcObject = stream;
         }
     
-        
-
-        
         const call = peerInstance.current?.call(remotePeerId,stream);
         if(call){
             call.on('stream',async (remoteStream:any)=>{
@@ -89,16 +104,24 @@ export default function CustomMedia(){
         }
       }
 
+      function handleVideo(){
+        if(state){
+            setEnableVideo(p=>!p);
+            state.getVideoTracks()[0].enabled = enableVideo;
+        }
+      }
+
     return <div className='flex flex-col w-screen h-screen justify-center items-center gap-4'>
             <p>{myId}</p>
             <div className='flex flex-col gap-4'>
-                <video ref={meRef} autoPlay className='rounded-xl bg-blue-200' />
-                <video ref={remoteRef} autoPlay className='rounded-xl bg-blue-200' />
+                <video ref={meRef} autoPlay className='rounded-xl bg-blue-200 w-40 h-40 object-cover'/>
+                <video ref={remoteRef} autoPlay className='rounded-xl bg-blue-200 w-40 h-40 object-cover' />
             </div>
 
             <div className='flex gap-4'>
                 <input type='text' ref={textRef} className='border rounded'/>
                 <button className='bg-blue-400 text-white p-2' onClick={handleConnect}>Connect</button>
+                <button className='bg-blue-400 text-white p-2' onClick={handleVideo}>Toggle video</button>
             </div>
             
     </div>
