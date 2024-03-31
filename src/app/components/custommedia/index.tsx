@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from "react"
-import Peer from "peerjs";
+// import Peer from "peerjs";
 
 
 export default function CustomMedia(){
@@ -9,10 +9,11 @@ export default function CustomMedia(){
     const remoteRef = useRef<HTMLVideoElement|null>(null);
     const textRef = useRef<HTMLInputElement>(null);
     const [peerId, setPeerId] = useState('');
-    const peerInstance = useRef<Peer|null>(null);
     const [myId,setMyId] = useState('');
+    const peerInstance = useRef<any>(null);
 
     useEffect(()=>{
+        import('peerjs').then(({ default: Peer }) => {
         const peer = new Peer();
         let stream:MediaStream;
 
@@ -41,11 +42,14 @@ export default function CustomMedia(){
            
           })
           peerInstance.current = peer;
+        
           return ()=>{
             if(stream){
                 stream.getTracks().forEach(track=>track.stop());
             }
           }
+        })
+        
     },[])
 
     const call = async (remotePeerId:string) => {
@@ -62,7 +66,7 @@ export default function CustomMedia(){
         
         const call = peerInstance.current?.call(remotePeerId,stream);
         if(call){
-            call.on('stream',async (remoteStream)=>{
+            call.on('stream',async (remoteStream:any)=>{
                 if(remoteRef.current){
                     remoteRef.current.srcObject = remoteStream;
                 }
