@@ -126,8 +126,8 @@ export default function CustomMedia(){
 
     return <div className='flex flex-col gap-4 items-center w-screen h-screen'>
         <div className='relative flex flex-col w-screen h-max-10/12 gap-4 items-center bg-black'>
-            <video ref={meRef} autoPlay muted={true} className='absolute left-4 top-4 rounded-xl bg-blue-200 w-1/5 h-1/3 object-cover z-[1000]'/>
-            <video ref={remoteRef} autoPlay className='relative bg-gray-400 w-screen md:w-8/12 h-auto object-cover' />
+            <video ref={meRef} autoPlay muted={true} className='absolute left-4 top-4 rounded-xl bg-blue-200 w-1/5 h-1/3 min-w-44 min-h-48 object-cover z-[1000]'/>
+            <video ref={remoteRef} autoPlay className='relative bg-gray-400 w-screen md:w-8/12 h-auto max-h-screen object-cover' />
             
             <div className='absolute flex gap-4 left-1/2 bottom-6 -translate-x-1/2 '>
                 {
