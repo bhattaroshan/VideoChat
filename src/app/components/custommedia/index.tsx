@@ -20,7 +20,41 @@ export default function CustomMedia(){
 
     const [cameraOn,setCameraOn] = useState(true);
     const [micOn,setMicOn] = useState(true);
+
+    const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder|null>(null);
+    const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
+    const recordedRef = useRef<HTMLVideoElement|null>(null);
+    // const mediaRecorder = useRef<MediaRecorder|null>(null);
+
+    // useEffect(()=>{
+    //     if(state){
+    //         console.log("I came inside state")
+    //         const recorder = new MediaRecorder(state);
+    //         recorder.ondataavailable = (event) => {
+    //             if (event.data.size > 0) {
+    //                 console.log("adding to the chunk");
+    //                 setRecordedChunks([...recordedChunks, event.data]);
+    //             }
+    //         };
+    //         recorder.start();
+    //     }
+    // },[state])
+    useEffect(() => {
+        if (mediaRecorder) {
+          const handleDataAvailable = (event: BlobEvent) => {
+            if (event.data.size > 0) {
+                console.log("trigger");
+              setRecordedChunks((prevChunks) => [...prevChunks, event.data]);
+            }
+          };
     
+          mediaRecorder.ondataavailable = handleDataAvailable;
+    
+          return () => {
+            mediaRecorder.ondataavailable = null;
+          };
+        }
+      }, [mediaRecorder]);
 
     useEffect(()=>{
         
@@ -32,14 +66,11 @@ export default function CustomMedia(){
                 debug: 1,
                 host: "crosshimalaya.roshanbhatta.com.np",
                 port: 443,
-                // port: 9000,
                 path: "/myapp",
                 secure: true,
-                // key: "peerjs",
-                // config: { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] }, // Replace with your own server URLs
             };
 
-            const peer = new peerJS.default(peerConfig);
+            const peer = new peerJS.default(uuidv4().slice(-12),peerConfig);
     
             peer.on('open', (id) => {
             //   setPeerId(id)
@@ -90,18 +121,37 @@ export default function CustomMedia(){
         
         // setRemoteState(stream);
         setState(stream);
+        // const options = {
+        //     mimeType: 'video/webm'
+        //   };
+        const media = new MediaRecorder(stream);
+        setMediaRecorder(media);
+        media.start(1000);
+        // media.ondataavailable = (event) => {
+        //     if(event.data.size>0){
+        //         console.log(event.data);
+        //         setRecordedChunks([...recordedChunks,event.data]);
+        //     }
+
+        // }        
+
+
         const call = peerInstance.current?.call(remotePeerId,stream);
         if(call){
-            call.on('stream',async (remoteStream:any)=>{
-                if(remoteRef.current){
+            // call.on('stream',async (remoteStream:any)=>{
+            call.on('stream',function(remoteStream:MediaStream){
+           
+                   if(remoteRef.current) {
                     remoteRef.current.srcObject = remoteStream;
                 }
+              
             })
         }
        } catch(error){
             console.log(error);
        }
-  
+
+       
         return ()=>{
             if(stream){
                 stream.getTracks().forEach(track=>track.stop);
@@ -115,11 +165,61 @@ export default function CustomMedia(){
         }
       }
 
-      function handleVideo(){
-        if(state){
-            //state.getVideoTracks()[0].enabled = enableVideo;
+    //   async function startRecording(){
+
+    //         console.log("came inside function");
+    //     if(state){
+    //         console.log("came inside");
+    //         const media = new MediaRecorder(state)
+    //         mediaRecorder.current = media;
+    //         mediaRecorder.current.start(1000);
+    //         mediaRecorder.current.ondataavailable = (event) => {
+    //             console.log("trigerring");
+    //             if(event.data.size<=0){
+    //                 return;
+    //             }
+
+    //             setRecordedChunks([...recordedChunks,event.data]);
+    //         }
+    //     }
+    //   }
+
+      async function stopRecording(){
+        if(mediaRecorder){
+            mediaRecorder.stop(); 
+
+            mediaRecorder.onstop = async () => {
+                console.log("the length is ",recordedChunks.length);
+                const blob = new Blob(recordedChunks, {type: mediaRecorder.mimeType});
+                if(recordedRef.current)
+                recordedRef.current.src = URL.createObjectURL(blob);
+                // const url = window.URL.createObjectURL(blob);
+                // const link = document.createElement('a');
+                // link.href = url;
+                // link.download = 'recorded-video.mkv';
+                // document.body.appendChild(link);
+                // link.click();
+                // document.body.removeChild(link);
+                // window.URL.revokeObjectURL(url);
+            };
         }
       }
+    //     if(mediaRecorder){
+    //         mediaRecorder.stop();
+    
+    //         mediaRecorder.onstop = async () => {
+    //             const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    //             const url = window.URL.createObjectURL(blob);
+    //             const link = document.createElement('a');
+    //             link.href = url;
+    //             link.download = 'recorded-video.webm';
+    //             document.body.appendChild(link);
+    //             link.click();
+    //             document.body.removeChild(link);
+    //             window.URL.revokeObjectURL(url);
+    //         };
+    //     }
+    //   }
 
     function handleCameraClick(){
         if(state){
@@ -176,6 +276,17 @@ export default function CustomMedia(){
             <div className='flex gap-4 w-screen md:w-6/12'>
                 <input type='text' ref={textRef} className='border rounded'/>
                 <button className='bg-blue-400 text-white p-2' onClick={handleConnect}>Connect</button>
+                <button className='bg-blue-400 text-white p-2' onClick={stopRecording}>Record</button>
+                <video ref={recordedRef} autoPlay className='w-44 h-44 bg-black'/>
+                {
+                // recordedChunks.length > 0 && 
+                // <a
+                //     href={URL.createObjectURL(new Blob(recordedChunks, { type: 'video/webm' }))}
+                //     download="recorded-video.webm"
+                // >
+                //     Download Recorded Video
+                // </a>
+                }
             </div>
     </div>
 }
