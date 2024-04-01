@@ -16,7 +16,7 @@ export default function CustomMedia(){
     const peerInstance = useRef<any>(null);
 
     const [state,setState] = useState<MediaStream|null>(null);
-    const [remoteState,setRemoteState] = useState<MediaStream|null>(null);
+    // const [remoteState,setRemoteState] = useState<MediaStream|null>(null);
 
     const [cameraOn,setCameraOn] = useState(true);
     const [micOn,setMicOn] = useState(true);
@@ -88,7 +88,8 @@ export default function CustomMedia(){
           meRef.current.srcObject = stream;
         }
         
-        setRemoteState(stream);
+        // setRemoteState(stream);
+        setState(stream);
         const call = peerInstance.current?.call(remotePeerId,stream);
         if(call){
             call.on('stream',async (remoteStream:any)=>{
@@ -126,10 +127,7 @@ export default function CustomMedia(){
             setCameraOn(p=>!p);
         }
 
-        if(remoteState){
-            remoteState.getVideoTracks()[0].enabled = !cameraOn;
-            setCameraOn(p=>!p);
-        }
+       
     }
 
     function handleMicClick(){
@@ -138,10 +136,6 @@ export default function CustomMedia(){
             setMicOn(p=>!p);
         }
 
-        if(remoteState){
-            remoteState.getAudioTracks()[0].enabled = !micOn;
-            setMicOn(p=>!p);
-        }
     }
 
     return <div className='flex flex-col gap-4 items-center w-screen h-screen'>
