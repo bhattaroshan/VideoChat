@@ -16,7 +16,7 @@ export default function CustomMedia(){
     const peerInstance = useRef<any>(null);
 
     const [state,setState] = useState<MediaStream|null>(null);
-    // const [remoteState,setRemoteState] = useState<MediaStream|null>(null);
+    const [remoteState,setRemoteState] = useState<MediaStream|null>(null);
 
     const [cameraOn,setCameraOn] = useState(true);
     const [micOn,setMicOn] = useState(true);
@@ -24,21 +24,11 @@ export default function CustomMedia(){
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder|null>(null);
     const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
     const recordedRef = useRef<HTMLVideoElement|null>(null);
-    // const mediaRecorder = useRef<MediaRecorder|null>(null);
 
-    // useEffect(()=>{
-    //     if(state){
-    //         console.log("I came inside state")
-    //         const recorder = new MediaRecorder(state);
-    //         recorder.ondataavailable = (event) => {
-    //             if (event.data.size > 0) {
-    //                 console.log("adding to the chunk");
-    //                 setRecordedChunks([...recordedChunks, event.data]);
-    //             }
-    //         };
-    //         recorder.start();
-    //     }
-    // },[state])
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+   
+
+  
     useEffect(() => {
         if (mediaRecorder) {
           const handleDataAvailable = (event: BlobEvent) => {
@@ -55,6 +45,63 @@ export default function CustomMedia(){
           };
         }
       }, [mediaRecorder]);
+
+     
+      useEffect(() => {
+        if (state && remoteState && meRef.current && remoteRef.current) {
+          const canvas = canvasRef.current;
+          const localVideo = meRef.current;
+          const remoteVideo = remoteRef.current;
+    
+          if (canvas && localVideo && remoteVideo) {
+            console.log("i did come inside big giant condition")
+            // const width = localVideo.width + remoteVideo.width;
+            // const height = Math.max(localVideo.height, remoteVideo.height);
+            const width = 500;
+            const height = 500;
+            // canvas.width = width;
+            // canvas.height = height;
+            canvas.width = 2*width
+            canvas.height = height;
+            console.log("my width and height is ",canvas.width,canvas.height);
+    
+            const context = canvas.getContext('2d');
+    
+            const drawStreams = () => {
+              if (context) {
+                console.log("context is successfull");
+                context.clearRect(0, 0,2*width,height);
+                context.drawImage(localVideo, 0, 0);
+                context.drawImage(remoteVideo, width, 0);
+                requestAnimationFrame(drawStreams);
+              }
+            };
+
+            drawStreams();
+    
+            const combinedStream = canvas.captureStream();
+            const source1Track = state.getAudioTracks();
+            if(source1Track.length>0){
+                const audioStream = new MediaStream(source1Track);
+                combinedStream.addTrack(audioStream.getAudioTracks()[0]);
+            }
+            const source2Track = remoteState.getAudioTracks();
+            if(source2Track.length>0){
+                const audioStream2 = new MediaStream(source2Track);
+                combinedStream.addTrack(audioStream2.getAudioTracks()[0]);
+            }
+            // const options = { mimeType: 'video/webm; codecs="vp8"' };
+            // const options = { mimeType: 'video/webm; codecs="vp8"' };
+            const mediaRecorder = new MediaRecorder(combinedStream);
+            setMediaRecorder(mediaRecorder);
+            mediaRecorder.start(1000);
+    
+            return () => {
+              mediaRecorder.stop();
+            };
+          }
+        }
+      }, [remoteState, state, meRef.current, remoteRef.current]);
 
     useEffect(()=>{
         
@@ -124,9 +171,9 @@ export default function CustomMedia(){
         // const options = {
         //     mimeType: 'video/webm'
         //   };
-        const media = new MediaRecorder(stream);
-        setMediaRecorder(media);
-        media.start(1000);
+        // const media = new MediaRecorder(stream);
+        // setMediaRecorder(media);
+        // media.start(1000);
         // media.ondataavailable = (event) => {
         //     if(event.data.size>0){
         //         console.log(event.data);
@@ -140,7 +187,7 @@ export default function CustomMedia(){
         if(call){
             // call.on('stream',async (remoteStream:any)=>{
             call.on('stream',function(remoteStream:MediaStream){
-           
+                   setRemoteState(remoteStream);
                    if(remoteRef.current) {
                     remoteRef.current.srcObject = remoteStream;
                 }
@@ -239,7 +286,8 @@ export default function CustomMedia(){
     }
 
     return <div className='flex flex-col gap-4 items-center w-screen h-screen'>
-        <div className='relative flex flex-col w-screen h-max-10/12 gap-4 items-center bg-black'>
+            <canvas ref={canvasRef}  className='bg-black '/>
+        <div className='relative flex flex-col w-screen h-max-10/12 gap-4 items-center bg-gray'>
             <video ref={meRef} autoPlay muted={true} className='absolute left-4 top-4 rounded-xl bg-blue-200 w-1/5 h-1/3 min-w-24 min-h-28  md:min-w-44 md:min-h-48 object-cover z-[1000]'/>
             <video ref={remoteRef} autoPlay className='relative bg-gray-400 w-screen md:w-8/12 h-auto max-h-screen object-cover' />
             
