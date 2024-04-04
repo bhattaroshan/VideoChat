@@ -84,17 +84,23 @@ export default function CustomMedia({meetId}:{meetId?:string}){
 
             drawStreams();
     
-            const combinedStream = canvas.captureStream();
-            const source1Track = state.getAudioTracks();
-            if(source1Track.length>0){
-                const audioStream = new MediaStream(source1Track);
-                combinedStream.addTrack(audioStream.getAudioTracks()[0]);
-            }
-            const source2Track = remoteState.getAudioTracks();
-            if(source2Track.length>0){
-                const audioStream2 = new MediaStream(source2Track);
-                combinedStream.addTrack(audioStream2.getAudioTracks()[0]);
-            }
+            //const combinedStream = canvas.captureStream();
+            const audioTracks = [
+                ...state.getAudioTracks(),
+                ...remoteState.getAudioTracks()
+            ];
+            const audioStream = new MediaStream(audioTracks);
+            const combinedStream = new MediaStream([...audioStream.getTracks(), ...canvas.captureStream().getTracks()]);
+            // const source1Track = state.getAudioTracks();
+            // if(source1Track.length>0){
+            //     const audioStream = new MediaStream(source1Track);
+            //     combinedStream.addTrack(audioStream.getAudioTracks()[0]);
+            // }
+            // const source2Track = remoteState.getAudioTracks();
+            // if(source2Track.length>0){
+            //     const audioStream2 = new MediaStream(source2Track);
+            //     combinedStream.addTrack(audioStream2.getAudioTracks()[0]);
+            // }
             // const options = { mimeType: 'video/webm; codecs="vp8"' };
             // const options = { mimeType: 'video/webm; codecs="vp8"' };
             const mediaRecorder = new MediaRecorder(combinedStream);
