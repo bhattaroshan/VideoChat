@@ -3,13 +3,16 @@ import CameraIcon from "@/icons/camera";
 import MicIcon from "@/icons/mic";
 import NoCameraIcon from "@/icons/nocamera";
 import NoMicIcon from "@/icons/nomic";
-import { useEffect, useRef, useState } from "react"
+import { MouseEventHandler, useEffect, useRef, useState } from "react"
 // import Peer from "peerjs";
 import {v4 as uuidv4} from 'uuid';
 import RecordPlay from "../record";
 import ReactPlayer from "react-player";
 import HangUpIcon from "@/icons/hangup";
 import RecordIcon from "@/icons/record";
+// import io from 'socket.io-client';
+
+// const socket = io('https://crosshimalaya.roshanbhatta.com.np/myapp:443');
 
 export default function CustomMedia({meetId}:{meetId?:string}){
     // const [stream,setStream] = useState<MediaStream|null>(null);
@@ -33,7 +36,6 @@ export default function CustomMedia({meetId}:{meetId?:string}){
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const [ready,setReady] = useState(false);
-
   
     useEffect(() => {
         if (mediaRecorder) {
@@ -60,7 +62,6 @@ export default function CustomMedia({meetId}:{meetId?:string}){
           const remoteVideo = remoteRef.current;
     
           if (canvas && localVideo && remoteVideo) {
-            console.log("i did come inside big giant condition")
             // const width = localVideo.width + remoteVideo.width;
             // const height = Math.max(localVideo.height, remoteVideo.height);
             const width = 1920;
@@ -69,13 +70,11 @@ export default function CustomMedia({meetId}:{meetId?:string}){
             // canvas.height = height;
             canvas.width = width
             canvas.height = height;
-            console.log("my width and height is ",canvas.width,canvas.height);
     
             const context = canvas.getContext('2d');
     
             const drawStreams = () => {
               if (context) {
-                console.log("context is successfull");
                 context.clearRect(0, 0,width,height);
                 context.drawImage(localVideo, 0, 0, width/2, height);
                 context.drawImage(remoteVideo, width/2, 0,width/2,height);
@@ -113,7 +112,7 @@ export default function CustomMedia({meetId}:{meetId?:string}){
         
         let stream:MediaStream;
 
-        async function connectPeer(){
+        async function connectPeer(myClientId:string){
             const peerJS = await import('peerjs');
             const peerConfig = {
                 debug: 1,
@@ -123,16 +122,37 @@ export default function CustomMedia({meetId}:{meetId?:string}){
                 secure: true,
             };
 
-            const peer = new peerJS.default(myMeetId,peerConfig);
-    
+            let peer = new peerJS.default(myClientId,peerConfig);
+
+            peer.on('error',async (error)=>{
+                if(error.type==='unavailable-id'){ //this id is already taken
+                    connectPeer(uuidv4().slice(-12));
+                }
+                // console.log("Yes i got an error here ",error)
+                // peer = new peerJS.default(uuidv4().slice(-12),peerConfig); 
+                // await handleConnect();
+            })
+
+            
+
             peer.on('open', (id) => {
             //   setPeerId(id)
               console.log(id);
               setMyId(id);
+              if(id!=myMeetId){ //there is already someone with this connection, connect directly
+                call(myMeetId);
+              }
             });
             
+            peer.on('connection',async (conn)=>{
+                conn.on('data',async (data)=>{
+                    console.log("data ",data);
+                })
+            })
+
             peer.on('call', async (call) => {
                 console.log("calling...")
+                
                 try{
                     stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                     setState(stream);
@@ -141,6 +161,7 @@ export default function CustomMedia({meetId}:{meetId?:string}){
                     }
                       call.answer(stream)
                       call.on('stream', function(remoteStream) {
+                        setRemoteState(remoteStream);
                         if(remoteRef.current){
                             remoteRef.current.srcObject = remoteStream
                         }
@@ -153,7 +174,7 @@ export default function CustomMedia({meetId}:{meetId?:string}){
               peerInstance.current = peer;
         }
        
-        connectPeer();
+        connectPeer(myMeetId);
 
           return ()=>{
             if(stream){
@@ -165,7 +186,10 @@ export default function CustomMedia({meetId}:{meetId?:string}){
 
     const call = async (remotePeerId:string) => {
         let stream:MediaStream;
-     
+        
+        const conn = peerInstance.current.connect(remotePeerId);
+        conn.send('hello there');
+
        try{
         stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         if(meRef.current){
@@ -212,9 +236,9 @@ export default function CustomMedia({meetId}:{meetId?:string}){
         }
       }
 
-      function handleConnect(){
+      async function handleConnect(){
         if(textRef.current){
-            call(textRef.current.value);
+            await call(textRef.current.value);
         }
       }
 
@@ -291,9 +315,9 @@ export default function CustomMedia({meetId}:{meetId?:string}){
         }
 
     }
-    function handleRecordClose(e:MouseEvent){
+    function handleRecordClose(){
         setReady(false);
-       e.stopPropagation(); 
+    //    e.stopPropagation(); 
     }
 
     return <div className={`relative flex flex-col gap-4 items-center w-screen h-screen bg-gray-800 ${ready&&'backdrop-blur-lg'}`}>
@@ -302,28 +326,28 @@ export default function CustomMedia({meetId}:{meetId?:string}){
                 // <div className='absolute flex justify-center items-center bg-red-200 rounded-lg w-[800px] h-[500px] 
                                 // left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[1001] backdrop-blur-lg' >
                         <div className='w-screen h-screen absolute z-[1001]'>
-                            <button className='absolute top-0 right-0 text-white p-2 rounded bg-blue-400' onClick={(e)=>handleRecordClose}>Close</button>
-                            <ReactPlayer url={URL.createObjectURL(new Blob(recordedChunks))} controls width='100%' height='100%' onClickPreview={(e)=>e.stopPropagation()}/>
+                            <button className='absolute top-0 right-0 text-white p-2 rounded bg-blue-400 z-[1002]' onClick={handleRecordClose}>Close</button>
+                            <ReactPlayer url={URL.createObjectURL(new Blob(recordedChunks))} controls width='100%' height='100%'/>
                         </div>
                 // </div>
                     }
             <canvas ref={canvasRef}  className='bg-black hidden '/>
-        <div className='relative flex flex-col w-screen h-max-10/12 gap-4 items-center bg-gray overflow-hidden'>
+        <div className='relative flex flex-col w-screen h-screen gap-4 items-center bg-gray overflow-hidden'>
             <video ref={meRef} autoPlay muted={true} className='absolute left-4 top-4 rounded-xl bg-blue-200 w-1/5 h-1/3 min-w-24 min-h-28  md:min-w-44 md:min-h-48 object-cover z-[1000]'/>
-            <video ref={remoteRef} autoPlay className='bg-gray-400 w-screen h-10/12 object-cover' />
+            <video ref={remoteRef} autoPlay className='bg-gray-400 w-screen h-screen object-cover' />
             
-            <div className='absolute flex gap-4 left-1/2 bottom-6 -translate-x-1/2 '>
+            <div className='absolute flex gap-2 left-1/2 bottom-6 -translate-x-1/2 '>
                 {
                     cameraOn?
                 <div className='w-fit h-fit p-4 
                                 rounded-full border bg-blue-400 border-blue-500 cursor-pointer
                                 hover:bg-blue-300 group' onClick={handleCameraClick}>
-                    <CameraIcon className='bottom-4 w-8 h-8 text-blue-100 group-hover:text-white'/>
+                    <CameraIcon className='bottom-4 w-4 h-4 text-blue-100 group-hover:text-white'/>
                 </div>:
                 <div className='w-fit h-fit p-4 
                                 rounded-full border bg-blue-400 border-blue-500 cursor-pointer
                                 hover:bg-blue-300 group' onClick={handleCameraClick}>
-                    <NoCameraIcon className='bottom-4 w-8 h-8 text-blue-100 group-hover:text-white'/>
+                    <NoCameraIcon className='bottom-4 w-4 h-4 text-blue-100 group-hover:text-white'/>
                 </div>
                 }
                 {
@@ -331,32 +355,32 @@ export default function CustomMedia({meetId}:{meetId?:string}){
                 <div className='w-fit h-fit p-4 
                                 rounded-full border bg-blue-400 border-blue-500 cursor-pointer
                                 hover:bg-blue-300 group' onClick={handleMicClick}>
-                    <MicIcon className='bottom-4 w-8 h-8 text-blue-100 group-hover:text-white'/>
+                    <MicIcon className='bottom-4 w-4 h-4 text-blue-100 group-hover:text-white'/>
                 </div>:
                 <div className='w-fit h-fit p-4 
                                 rounded-full border bg-blue-400 border-blue-500 cursor-pointer
                                 hover:bg-blue-300 group' onClick={handleMicClick}>
-                    <NoMicIcon className='bottom-4 w-8 h-8 text-blue-100 group-hover:text-white'/>
+                    <NoMicIcon className='bottom-4 w-4 h-4 text-blue-100 group-hover:text-white'/>
                 </div>
                 }
                 <div className='w-fit h-fit p-4 
                                 rounded-full border bg-red-400 border-red-500 cursor-pointer
-                                hover:bg-red-300 active:bg-red-500 group' onClick={handleMicClick}>
-                    <RecordIcon className='bottom-4 w-8 h-8 text-blue-100 group-hover:text-white'/>
+                                hover:bg-red-300 active:bg-red-500 group' onClick={stopRecording}>
+                    <RecordIcon className='bottom-4 w-4 h-4 text-blue-100 group-hover:text-white'/>
                 </div>                        
                 <div className='w-fit h-fit p-4 
                                 rounded-full border bg-red-400 border-red-500 cursor-pointer
                                 hover:bg-red-300 active:bg-red-500 group' onClick={handleMicClick}>
-                    <HangUpIcon className='bottom-4 w-8 h-8 text-blue-100 group-hover:text-white'/>
+                    <HangUpIcon className='bottom-4 w-4 h-4 text-blue-100 group-hover:text-white'/>
                 </div>
             </div>
         </div>
             
-            <div className='flex justify-center gap-4 w-screen md:w-6/12'>
+            {/* <div className='flex justify-center gap-4 w-screen md:w-6/12'>
                 <input type='text' ref={textRef} className='border rounded'/>
                 <button className='bg-blue-400 text-white p-2' onClick={handleConnect}>Connect</button>
                 <button className='bg-blue-400 text-white p-2' onClick={stopRecording}>Play Recording</button>
-            </div>
+            </div> */}
            
     </div>
 }
