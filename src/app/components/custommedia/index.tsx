@@ -352,7 +352,7 @@ export default function CustomMedia({meetId}:{meetId?:string}){
                     }
             <canvas ref={canvasRef}  className='bg-black hidden '/>
         <div className='relative flex flex-col w-screen h-screen gap-4 justify-center items-center bg-gray overflow-hidden'>
-            <video ref={meRef} autoPlay muted={true} className='absolute left-4 top-4 rounded-xl bg-blue-200 w-1/5 h-auto min-w-24 min-h-28  object-cover z-[1000]'/>
+            <video ref={meRef} autoPlay muted={true} className={`absolute left-4 top-4 rounded-xl bg-blue-200 w-[200px] ${Boolean(state)?'h-auto':'h-[150px]'}  object-contain z-[1000]`}/>
             <video ref={remoteRef} autoPlay className='bg-gray-400 w-screen h-auto object-contain' />
             
             <div className='absolute flex gap-2 left-1/2 bottom-6 -translate-x-1/2 '>
