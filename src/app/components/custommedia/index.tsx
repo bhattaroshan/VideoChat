@@ -126,6 +126,7 @@ export default function CustomMedia({meetId}:{meetId?:string}){
 
             peer.on('error',async (error)=>{
                 if(error.type==='unavailable-id'){ //this id is already taken
+                    peer.destroy();
                     connectPeer(uuidv4().slice(-12));
                 }
                 // console.log("Yes i got an error here ",error)
@@ -133,7 +134,6 @@ export default function CustomMedia({meetId}:{meetId?:string}){
                 // await handleConnect();
             })
 
-            
 
             peer.on('open', (id) => {
             //   setPeerId(id)
@@ -144,15 +144,24 @@ export default function CustomMedia({meetId}:{meetId?:string}){
               }
             });
             
-            peer.on('connection',async (conn)=>{
-                conn.on('data',async (data)=>{
-                    console.log("data ",data);
-                })
+
+            peer.on('connection',(conn)=>{
+                console.log('connection request from ',conn);
+            })
+
+            peer.on('disconnected',()=>{
+                console.log('connection disconnected from ');
+            })
+            
+            peer.on('close',()=>{
+                console.log("closed the connection");
             })
 
             peer.on('call', async (call) => {
                 console.log("calling...")
-                
+                 // Establish a data channel for sending messages
+                // call.close(); 
+
                 try{
                     stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
                     setState(stream);
@@ -212,7 +221,7 @@ export default function CustomMedia({meetId}:{meetId?:string}){
 
         // }        
 
-
+        // const call = peerInstance.current.connect(remotePeerId,stream);
         const call = peerInstance.current?.call(remotePeerId,stream);
         if(call){
             // call.on('stream',async (remoteStream:any)=>{
@@ -315,6 +324,16 @@ export default function CustomMedia({meetId}:{meetId?:string}){
         }
 
     }
+
+    function handleEndCall(){
+        if (peerInstance.current) {
+            // Close all active connections
+            peerInstance.current.connections.forEach((connection: any) => {
+                connection.close();
+            });
+        }
+    }
+
     function handleRecordClose(){
         setReady(false);
     //    e.stopPropagation(); 
@@ -332,9 +351,9 @@ export default function CustomMedia({meetId}:{meetId?:string}){
                 // </div>
                     }
             <canvas ref={canvasRef}  className='bg-black hidden '/>
-        <div className='relative flex flex-col w-screen h-screen gap-4 items-center bg-gray overflow-hidden'>
-            <video ref={meRef} autoPlay muted={true} className='absolute left-4 top-4 rounded-xl bg-blue-200 w-1/5 h-1/3 min-w-24 min-h-28  md:min-w-44 md:min-h-48 object-cover z-[1000]'/>
-            <video ref={remoteRef} autoPlay className='bg-gray-400 w-screen h-screen object-cover' />
+        <div className='relative flex flex-col w-screen h-screen gap-4 justify-center items-center bg-gray overflow-hidden'>
+            <video ref={meRef} autoPlay muted={true} className='absolute left-4 top-4 rounded-xl bg-blue-200 w-1/5 h-auto min-w-24 min-h-28  object-cover z-[1000]'/>
+            <video ref={remoteRef} autoPlay className='bg-gray-400 w-screen h-auto object-contain' />
             
             <div className='absolute flex gap-2 left-1/2 bottom-6 -translate-x-1/2 '>
                 {
@@ -370,7 +389,7 @@ export default function CustomMedia({meetId}:{meetId?:string}){
                 </div>                        
                 <div className='w-fit h-fit p-4 
                                 rounded-full border bg-red-400 border-red-500 cursor-pointer
-                                hover:bg-red-300 active:bg-red-500 group' onClick={handleMicClick}>
+                                hover:bg-red-300 active:bg-red-500 group' onClick={handleEndCall}>
                     <HangUpIcon className='bottom-4 w-4 h-4 text-blue-100 group-hover:text-white'/>
                 </div>
             </div>
