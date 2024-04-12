@@ -4,11 +4,13 @@ import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
 
 
 export const usePeer = (clientId:string, onOpenCallback:(id:string)=>void)=>{
+    console.log("I am from inside usePeer");
     const [peer,setPeer] = useState<any>(null);
-    const [peerId,setPeerId] = useState<any>(null);
-    const peerInstance = useRef<any>(null);
+    const isPeerSet = useRef(false);
 
     useEffect(()=>{
+        if(isPeerSet.current) return;
+        isPeerSet.current = true;
         let mypeer;
         (async function initPeer(){
             const peerJS = await import('peerjs');
@@ -22,7 +24,6 @@ export const usePeer = (clientId:string, onOpenCallback:(id:string)=>void)=>{
 
             mypeer = new peerJS.default(clientId,peerConfig);
             setPeer(mypeer);
-            peerInstance.current = peer;
 
             mypeer.on('open',async (id:string)=>{
                 if (onOpenCallback && typeof onOpenCallback === 'function') {
@@ -45,6 +46,5 @@ export const usePeer = (clientId:string, onOpenCallback:(id:string)=>void)=>{
     },[])
     return {
         peer: peer,
-        peerInstance: peerInstance
     }
 }
