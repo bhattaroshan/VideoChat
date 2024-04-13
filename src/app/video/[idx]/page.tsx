@@ -84,7 +84,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
             console.log("Got a call from ",call.peer);
             call.answer(stream);
             call.on('stream', function(otherStream) {
-                console.log("MY METADATA", call.metadata);
+                console.log("MY METADATA", call.metadata.deviceType);
                 updateStreams(call.peer,otherStream);
             })
 
