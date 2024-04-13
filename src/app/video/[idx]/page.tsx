@@ -148,8 +148,9 @@ export default function CustomStream({params}:{params:{idx:string}}){
                         'basis-1/3':streamLen>2 && streamLen<5,
                         'basis-1/4':streamLen>=5
                     })}>
-                        <CustomPlayer muted={v===myId} stream={currentStream} className={cn('w-full h-auto',{
-                            'h-full': deviceType==='mobile',
+                        <CustomPlayer muted={v===myId} stream={currentStream} className={cn({
+                            'h-auto w-full': deviceType!=='mobile',
+                            'h-full w-auto': deviceType==='mobile',
                             // 'w-auto h-full':isMobileResolution(currentStream,v),
                             // 'w-full h-auto':!isMobileResolution(currentStream,v)
                         })}/>
