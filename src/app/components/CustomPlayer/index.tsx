@@ -18,7 +18,7 @@ export default function CustomPlayer({stream,className,user, muted=true}:
         setIsReady(true);
     }
 
-    return <video ref={videoRef} muted={muted} autoPlay className={twMerge('object-contain',className)} />
+    return <video ref={videoRef} muted={muted} autoPlay playsInline={true} className={twMerge('object-contain',className)} />
 }
 
 
