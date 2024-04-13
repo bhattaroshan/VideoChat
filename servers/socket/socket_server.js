@@ -24,6 +24,12 @@ io.on('connection', (socket) => {
     socket.join(room_id);
     socket.broadcast.to(room_id).emit("client:connect",client_id);
     })
+  
+    socket.on('client:disconnect',(room_id,client_id)=>{
+      // clientMapping[socket.id] = {client_id:client_id,room_id:room_id}; // Store the mapping
+      socket.join(room_id);
+      socket.broadcast.to(room_id).emit("client:disconnect",client_id);
+      })
 
   
   socket.on('disconnect',()=>{

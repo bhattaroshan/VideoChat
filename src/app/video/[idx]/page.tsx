@@ -46,6 +46,26 @@ export default function CustomStream({params}:{params:{idx:string}}){
         }
     }
 
+    useEffect(() => {
+        // Function to handle the beforeunload event
+        const handleBeforeUnload = (event:any) => {
+            socket.emit('client:disconnect', room_id, myId); // Send a disconnection message to the server
+    
+            if (peer) {
+                peer.disconnect(); // Disconnect the peer
+            }
+            event.preventDefault();
+            event.returnValue = ''; // This can trigger a confirmation prompt in some browsers
+        };
+    
+        window.addEventListener('beforeunload', handleBeforeUnload);
+    
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [socket, peer, myId]);
+
+
     useEffect(()=>{
         if(!stream || !myId) return;
 
@@ -75,20 +95,10 @@ export default function CustomStream({params}:{params:{idx:string}}){
     useEffect(()=>{
         if(!socket || !stream || !peer) return;
 
-        // function handleDisconnect(client_id:string){
-            // console.log("Yes the disconnection is triggered");
-                // setRemoteStreams((prevStreams) => {
-                //     console.log(prevStreams);
-                //     const updatedStreams = { ...prevStreams };
-                //     delete updatedStreams[client_id];
-                //     return updatedStreams;
-                // });
-                // const playersCopy = cloneDeep(remoteStreams);
-                // delete playersCopy[client_id];
-                // setRemoteStreams(playersCopy);
-
-               
-        // }
+        function handleDisconnect(client_id:string){
+            deleteStream(client_id);
+        }
+        
 
         function handleConnect(client_id:string){
                 const call = peer.call(client_id,stream);
@@ -105,10 +115,12 @@ export default function CustomStream({params}:{params:{idx:string}}){
             }
 
         socket.on('client:connect', handleConnect);
+        socket.on('client:disconnect', handleDisconnect);
         // socket.on('client:disconnect', handleDisconnect);
 
        return ()=>{
         socket.off('client:connect',handleConnect)
+        socket.off('client:disconnect',handleDisconnect)
         // socket.off('client:disconnect',handleDisconnect)
        } 
     },[socket,stream,peer])
