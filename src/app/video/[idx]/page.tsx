@@ -46,12 +46,13 @@ export default function CustomStream({params}:{params:{idx:string}}){
         }
     }
 
-    function isMobileResolution(stream:MediaStream) {
+    function isMobileResolution(stream:MediaStream,key:string) {
         const videoTrack = stream.getVideoTracks()[0];
         const videoSettings = videoTrack.getSettings();
         const { width, height } = videoSettings;
         console.log("width = ",width)
         console.log("height = ",height)
+        console.log("key = ",key)
         // Define thresholds for mobile aspect ratios
         const mobileAspectRatio = 9 / 16; // Modify as needed
         if(width && height){
@@ -162,8 +163,8 @@ export default function CustomStream({params}:{params:{idx:string}}){
                         'basis-1/4':streamLen>=5
                     })}>
                         <CustomPlayer muted={v===myId} stream={currentStream} className={cn({
-                            'w-auto h-full':isMobileResolution(currentStream),
-                            'w-full h-full':!isMobileResolution(currentStream)
+                            'w-auto h-full':isMobileResolution(currentStream,v),
+                            'w-full h-full':!isMobileResolution(currentStream,v)
                         })}/>
                         </div>
                 })
