@@ -54,15 +54,10 @@ export default function CustomStream({params}:{params:{idx:string}}){
         console.log("height = ",height)
         console.log("key = ",key)
         // Define thresholds for mobile aspect ratios
-        const mobileAspectRatio = 9 / 16; // Modify as needed
-        if(width && height){
-            const currentAspectRatio = width / height;
-            return (
-                width <= 1080 &&
-                height <= 1920 &&
-                Math.abs(currentAspectRatio - mobileAspectRatio) < 0.1
-            );
-        }
+        // const mobileAspectRatio = 9 / 16; // Modify as needed
+        if(!width || !height) return false;
+        if(height>width) return true;
+
         return false;
     }
         // Check the resolution and aspect ratio
