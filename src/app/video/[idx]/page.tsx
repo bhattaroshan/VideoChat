@@ -25,9 +25,9 @@ export default function CustomStream({params}:{params:{idx:string}}){
     const streamLen = Object.keys(remoteStreams).length;
     console.log(streamLen);
 
-    function updateStreams(client_id:string,currentStream:MediaStream){
+    function updateStreams(client_id:string,currentStream:MediaStream,deviceType='unknown'){
         setRemoteStreams((prevStreams) => (
-            {...prevStreams,[client_id]:{stream:currentStream}}
+            {...prevStreams,[client_id]:{stream:currentStream,deviceType:deviceType}}
         ));
     }
 
@@ -84,8 +84,8 @@ export default function CustomStream({params}:{params:{idx:string}}){
             console.log("Got a call from ",call.peer);
             call.answer(stream);
             call.on('stream', function(otherStream) {
-                console.log("MY METADATA", call.metadata.deviceType);
-                updateStreams(call.peer,otherStream);
+                // console.log("MY METADATA", call.metadata.deviceType);
+                updateStreams(call.peer,otherStream,call.metadata.deviceType);
             })
 
             call.on('close',()=>{
@@ -140,7 +140,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
             Object.keys.length>0&&
             (
                 Object.keys(remoteStreams).map((v,i)=>{
-                    const {stream:currentStream} = remoteStreams[v];
+                    const {stream:currentStream,deviceType} = remoteStreams[v];
                     return <div key={i} className={cn('flex items-center justify-center',{
                         // 'basis-5/12':streamLen===2,
                         'basis-full':streamLen===1 || (streamLen===2 && v!=myId),
@@ -149,6 +149,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
                         'basis-1/4':streamLen>=5
                     })}>
                         <CustomPlayer muted={v===myId} stream={currentStream} className={cn('w-full h-auto',{
+                            'h-full': deviceType==='mobile',
                             // 'w-auto h-full':isMobileResolution(currentStream,v),
                             // 'w-full h-auto':!isMobileResolution(currentStream,v)
                         })}/>
