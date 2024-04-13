@@ -46,20 +46,6 @@ export default function CustomStream({params}:{params:{idx:string}}){
         }
     }
 
-    function isMobileResolution(stream:MediaStream,key:string) {
-        const videoTrack = stream.getVideoTracks()[0];
-        const videoSettings = videoTrack.getSettings();
-        const { width, height } = videoSettings;
-        console.log("width = ",width)
-        console.log("height = ",height)
-        console.log("key = ",key)
-        // Define thresholds for mobile aspect ratios
-        // const mobileAspectRatio = 9 / 16; // Modify as needed
-        if(!width || !height) return true;
-        if(height>width) return true;
-
-        return false;
-    }
         // Check the resolution and aspect ratio
         
 
@@ -98,6 +84,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
             console.log("Got a call from ",call.peer);
             call.answer(stream);
             call.on('stream', function(otherStream) {
+                console.log("MY METADATA", call.metadata);
                 updateStreams(call.peer,otherStream);
             })
 
@@ -118,7 +105,11 @@ export default function CustomStream({params}:{params:{idx:string}}){
         
 
         function handleConnect(client_id:string){
-                const call = peer.call(client_id,stream);
+                const call = peer.call(client_id,stream,{
+                    metadata:{
+                        "deviceType": /Mobi/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+                    }
+                });
                 if(call){
                     call.on('stream',async function(otherStream:MediaStream){
                         console.log(remoteStreams);
@@ -157,9 +148,9 @@ export default function CustomStream({params}:{params:{idx:string}}){
                         'basis-1/3':streamLen>2 && streamLen<5,
                         'basis-1/4':streamLen>=5
                     })}>
-                        <CustomPlayer muted={v===myId} stream={currentStream} className={cn({
-                            'w-auto h-full':isMobileResolution(currentStream,v),
-                            'w-full h-full':!isMobileResolution(currentStream,v)
+                        <CustomPlayer muted={v===myId} stream={currentStream} className={cn('w-full h-auto',{
+                            // 'w-auto h-full':isMobileResolution(currentStream,v),
+                            // 'w-full h-auto':!isMobileResolution(currentStream,v)
                         })}/>
                         </div>
                 })
