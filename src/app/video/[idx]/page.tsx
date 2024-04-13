@@ -54,8 +54,8 @@ export default function CustomStream({params}:{params:{idx:string}}){
             if (peer) {
                 peer.disconnect(); // Disconnect the peer
             }
-            event.preventDefault();
-            event.returnValue = ''; // This can trigger a confirmation prompt in some browsers
+            // event.preventDefault();
+            // event.returnValue = ''; // This can trigger a confirmation prompt in some browsers
         };
     
         window.addEventListener('beforeunload', handleBeforeUnload);
@@ -125,7 +125,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
        } 
     },[socket,stream,peer])
 
-    return <div className={cn(`flex flex-wrap h-screen bg-gray-900 overflow-hidden w-screen min-h-screen gap-4 p-4 items-center justify-center`,{
+    return <div className={cn(`flex flex-wrap h-screen bg-gray-900 overflow-hidden w-screen min-h-screen gap-x-4 p-2 items-center justify-center`,{
     })}>
        
         {

@@ -10,7 +10,12 @@ export const useMediaStream = ()=>{
             try{
                 stream = await navigator.mediaDevices.getUserMedia({
                     audio: true,
-                    video: true
+                    video: {
+                        // Use constraints that are suitable for mobile devices
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    }
+                    // video: true
                 })
                 setState(stream);
             }catch(error){
