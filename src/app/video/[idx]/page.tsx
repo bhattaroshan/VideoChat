@@ -140,7 +140,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
                         'basis-1/3':streamLen>2 && streamLen<5,
                         'basis-1/4':streamLen>=5
                     })}>
-                        <CustomPlayer muted={v===myId} stream={currentStream} className={cn('w-auto h-full')}/>
+                        <CustomPlayer muted={v===myId} stream={currentStream} className={cn('w-auto h-full sm:w-full')}/>
                         </div>
                 })
 
