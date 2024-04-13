@@ -5,11 +5,10 @@ export const useMediaStream = ()=>{
     const [state,setState] = useState<MediaStream|null>(null);
 
     useEffect(()=>{
-        if(typeof window !== 'undefined'){
-
+        let stream:MediaStream;
         (async function initMedia(){
             try{
-                const stream = await navigator.mediaDevices.getUserMedia({
+                stream = await navigator.mediaDevices.getUserMedia({
                     audio: true,
                     video: true
                 })
@@ -18,7 +17,11 @@ export const useMediaStream = ()=>{
                 console.log("Error in navigator");
             }
         })();
-    }
+    return ()=>{
+        if(stream){
+            stream.getTracks().forEach(track=>track.stop());
+        }
+      }
     },[])
 
     return {
