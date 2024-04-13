@@ -1,14 +1,24 @@
-import ReactPlayer from "react-player";
+'use client'
+import { useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 export default function CustomPlayer({stream,className,user, muted=true}:
                 {stream:MediaStream,className?:string,user?:string,muted?:boolean}){
-    return <div className={twMerge('relative flex flex-col text-right text-white',className)}>
-        {
-            user && <div className='absolute top-2 right-2 bg-gray-400 p-2 rounded-md'>
-                <p>{user}</p>
-                </div>
+    
+    const [isReady,setIsReady] = useState(false);
+    const videoRef = useRef<HTMLVideoElement|null>(null);
+    
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.srcObject = stream;
         }
-        <ReactPlayer url={stream} playing muted={muted} className='[&>video]:object-contain [&>video]:max-h-screen' width={'100%'} height={'100%'}/>
-    </div>
+    }, [stream]);
+    
+    function handleReady(){
+        setIsReady(true);
+    }
+
+    return <video ref={videoRef} muted={muted} autoPlay className={twMerge('object-contain',className)} />
 }
+
+

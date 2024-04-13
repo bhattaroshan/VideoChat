@@ -7,9 +7,10 @@ import { MediaConnection } from 'peerjs';
 import { useEffect, useState } from 'react';
 import ReactPlayer from 'react-player';
 import io from 'socket.io-client';
-import {v4 as uuidv4} from 'uuid'
-import {cloneDeep} from 'lodash';
+import {cloneDeep, update} from 'lodash';
 import CustomPlayer from '@/app/components/CustomPlayer';
+import { cn } from '@/app/utils';
+import clsx from 'clsx';
 
 const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
 // const socket = io('http://localhost:9001');
@@ -18,17 +19,41 @@ const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
 export default function CustomStream({params}:{params:{idx:string}}){
     const room_id = params.idx;
 
-    const client_id = uuidv4().slice(-12);
-    const {peer} = usePeer(client_id,onOpenCallback);
+    const {peer,myId} = usePeer(onOpenCallback);
     const {stream} = useMediaStream();
     const [remoteStreams,setRemoteStreams] = useState<Record<string,any>>({});
+    const streamLen = Object.keys(remoteStreams).length;
+    console.log(streamLen);
+
+    function updateStreams(client_id:string,currentStream:MediaStream){
+        setRemoteStreams((prevStreams) => (
+            {...prevStreams,[client_id]:{stream:currentStream}}
+        ));
+    }
+
+    function deleteStream(client_id:string){
+        setRemoteStreams((prevStreams) => {
+            const updatedStreams = { ...prevStreams };
+            delete updatedStreams[client_id];
+            return updatedStreams;
+        });
+    }
 
     function onOpenCallback(id:string){
         console.log("MY ID ",id);
         if(socket){
-            socket.emit('client:connect_request',room_id,client_id)
+            socket.emit('client:connect_request',room_id,myId)
         }
     }
+
+    useEffect(()=>{
+        if(!stream || !myId) return;
+
+        setRemoteStreams((prevStreams) => (
+            {...prevStreams,[myId]:{stream:stream}}
+        ));
+    },[stream,myId])
+    
 
     useEffect(()=>{
         if(!peer || !stream) return;
@@ -36,19 +61,12 @@ export default function CustomStream({params}:{params:{idx:string}}){
             console.log("Got a call from ",call.peer);
             call.answer(stream);
             call.on('stream', function(otherStream) {
-                setRemoteStreams((prevStreams) => (
-                        {...prevStreams,[call.peer]:{stream:otherStream}}
-                    ));
-                })
+                updateStreams(call.peer,otherStream);
+            })
 
             call.on('close',()=>{
                 console.log("I sent close request to everybody");
-                setRemoteStreams((prevStreams) => {
-                    console.log(prevStreams);
-                    const updatedStreams = { ...prevStreams };
-                    delete updatedStreams[call.peer];
-                    return updatedStreams;
-                });
+                deleteStream(call.peer);
             })
         })
 
@@ -77,17 +95,11 @@ export default function CustomStream({params}:{params:{idx:string}}){
                 if(call){
                     call.on('stream',async function(otherStream:MediaStream){
                         console.log(remoteStreams);
-                        setRemoteStreams((prevStreams) => (
-                            {...prevStreams,[client_id]:{stream:otherStream}}
-                        ));
+                        updateStreams(client_id,otherStream);
                     })
 
                     call.on('close',()=>{
-                        setRemoteStreams((prevStreams) => {
-                            const updatedStreams = { ...prevStreams };
-                            delete updatedStreams[call.peer];
-                            return updatedStreams;
-                        });
+                        deleteStream(client_id);
                     })
                 }
             }
@@ -101,20 +113,27 @@ export default function CustomStream({params}:{params:{idx:string}}){
        } 
     },[socket,stream,peer])
 
-    return <div className='relative flex flex-col gap-4 bg-gray-900 min-h-screen justify-center items-center w-screen'>
+    return <div className={cn(`flex flex-wrap h-screen bg-gray-900 overflow-hidden w-screen min-h-screen gap-4 p-4 items-center justify-center`,{
+    })}>
+       
         {
-            stream&&
-            <CustomPlayer stream={stream} user={'Me'}/>
-        }
-        <div className='flex gap-4 flex-wrap justify-center'>
-        {
-            Object.keys(remoteStreams).map((v,i)=>{
-                const {stream:currentStream} = remoteStreams[v];
-                return <CustomPlayer key={i} muted={false} stream={currentStream} user={String(i)} className='w-[200px] h-auto'/>
-            })
+            Object.keys.length>0&&
+            (
+                Object.keys(remoteStreams).map((v,i)=>{
+                    const {stream:currentStream} = remoteStreams[v];
+                    return <div key={i} className={cn({
+                        'basis-full':streamLen===1,
+                        'basis-5/12':streamLen===2,
+                        'basis-1/3':streamLen>2 && streamLen<5,
+                        'basis-1/4':streamLen>=5
+                    })}>
+                        <CustomPlayer muted={v===myId} stream={currentStream} className={cn('w-full h-full')}/>
+                        </div>
+                })
+
+            )
            
         }
-        </div>
     </div>
 
 }

@@ -1,11 +1,13 @@
 'use client'
 import { MediaConnection } from "peerjs";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react"
+import {v4 as uuidv4} from 'uuid'
 
 
-export const usePeer = (clientId:string, onOpenCallback:(id:string)=>void)=>{
+export const usePeer = (onOpenCallback:(id:string)=>void)=>{
     console.log("I am from inside usePeer");
     const [peer,setPeer] = useState<any>(null);
+    const [myId,setMyId] = useState(uuidv4().slice(-12));
     const isPeerSet = useRef(false);
 
     useEffect(()=>{
@@ -22,7 +24,7 @@ export const usePeer = (clientId:string, onOpenCallback:(id:string)=>void)=>{
                 secure: true,
             };
 
-            mypeer = new peerJS.default(clientId,peerConfig);
+            mypeer = new peerJS.default(myId,peerConfig);
             setPeer(mypeer);
 
             mypeer.on('open',async (id:string)=>{
@@ -46,5 +48,6 @@ export const usePeer = (clientId:string, onOpenCallback:(id:string)=>void)=>{
     },[])
     return {
         peer: peer,
+        myId: myId
     }
 }
