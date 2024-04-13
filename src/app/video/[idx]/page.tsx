@@ -9,9 +9,10 @@ import ReactPlayer from 'react-player';
 import io from 'socket.io-client';
 import {v4 as uuidv4} from 'uuid'
 import {cloneDeep} from 'lodash';
+import CustomPlayer from '@/app/components/CustomPlayer';
 
-// const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
-const socket = io('http://localhost:9001');
+const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
+// const socket = io('http://localhost:9001');
 
 
 export default function CustomStream({params}:{params:{idx:string}}){
@@ -100,29 +101,20 @@ export default function CustomStream({params}:{params:{idx:string}}){
        } 
     },[socket,stream,peer])
 
-    return <div className='flex bg-gray-900 min-h-screen items-center '>
+    return <div className='relative flex flex-col gap-4 bg-gray-900 min-h-screen justify-center items-center w-screen'>
         {
             stream&&
-            <div className='flex w-screen h-screen'>
-                <ReactPlayer url={stream} playing muted className='[&>video]:object-contain [&>video]:max-h-screen' 
-                    width={`${Object.keys(remoteStreams).length>0?'20%':'100%'}`}  
-                    height={`${Object.keys(remoteStreams).length>0?'20%':'100%'}`}>
-               
-                    </ReactPlayer>
-                <div className='border border-gray-400 rounded-md z-[1000]'>
-                    <p className='text-white z-[1000]'>Hello</p>
-                </div>
-            </div>
+            <CustomPlayer stream={stream} user={'Me'}/>
         }
-
+        <div className='flex gap-4 flex-wrap justify-center'>
         {
-            Object.keys(remoteStreams).map((v)=>{
+            Object.keys(remoteStreams).map((v,i)=>{
                 const {stream:currentStream} = remoteStreams[v];
-                return <ReactPlayer key={v} url={currentStream} playing className='border-2 border-red-400 [&>video]:object-cover' width={'20%'} height={'20%'}/>
+                return <CustomPlayer key={i} stream={currentStream} user={String(i)} className='w-[200px] h-auto'/>
             })
-            // Object.values((remoteStreams)).map((v,i)=>{
-            //     return <ReactPlayer key={i} url={v} playing className='border-2 border-red-400 [&>video]:object-cover' width={'20%'} height={'20%'}/>
-            // })
+           
         }
+        </div>
     </div>
+
 }
