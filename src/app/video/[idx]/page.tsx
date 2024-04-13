@@ -110,7 +110,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
         {
             Object.keys(remoteStreams).map((v,i)=>{
                 const {stream:currentStream} = remoteStreams[v];
-                return <CustomPlayer key={i} stream={currentStream} user={String(i)} className='w-[200px] h-auto'/>
+                return <CustomPlayer key={i} muted={false} stream={currentStream} user={String(i)} className='w-[200px] h-auto'/>
             })
            
         }
