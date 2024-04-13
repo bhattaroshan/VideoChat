@@ -46,6 +46,25 @@ export default function CustomStream({params}:{params:{idx:string}}){
         }
     }
 
+    function isMobileResolution(stream:MediaStream) {
+        const videoTrack = stream.getVideoTracks()[0];
+        const videoSettings = videoTrack.getSettings();
+        const { width, height } = videoSettings;
+        // Define thresholds for mobile aspect ratios
+        const mobileAspectRatio = 16 / 9; // Modify as needed
+        if(width && height){
+            const currentAspectRatio = width / height;
+            return (
+                width <= 1080 &&
+                height <= 1920 &&
+                Math.abs(currentAspectRatio - mobileAspectRatio) < 0.1
+            );
+        }
+        return false;
+    }
+        // Check the resolution and aspect ratio
+        
+
     useEffect(() => {
         // Function to handle the beforeunload event
         const handleBeforeUnload = (event:any) => {
@@ -140,7 +159,9 @@ export default function CustomStream({params}:{params:{idx:string}}){
                         'basis-1/3':streamLen>2 && streamLen<5,
                         'basis-1/4':streamLen>=5
                     })}>
-                        <CustomPlayer muted={v===myId} stream={currentStream} className={cn('w-auto h-full sm:w-full')}/>
+                        <CustomPlayer muted={v===myId} stream={currentStream} className={cn('w-full h-full',{
+                            'w-auto':isMobileResolution(currentStream)
+                        })}/>
                         </div>
                 })
 
