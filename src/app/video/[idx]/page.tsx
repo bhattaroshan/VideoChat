@@ -23,14 +23,8 @@ export default function CustomStream({params}:{params:{idx:string}}){
     const {stream} = useMediaStream();
     const [remoteStreams,setRemoteStreams] = useState<Record<string,any>>({});
     const streamLen = Object.keys(remoteStreams).length;
-    console.log(streamLen);
 
     const [highlightedKey, setHighlightedKey] = useState(myId);
-    // const remoteCopy = cloneDeep(remoteStreams);
-    // const highlightedPlayer = remoteCopy[highlightedKey];
-    // console.log(highlightedPlayer);
-    // delete remoteCopy[highlightedKey];
-    // const nonHighlightedPlayer = remoteCopy;
 
 
     function updateStreams(client_id:string,currentStream:MediaStream,deviceType='unknown'){
@@ -108,12 +102,18 @@ export default function CustomStream({params}:{params:{idx:string}}){
     useEffect(()=>{
         if(!socket || !stream || !peer) return;
 
-        function handleDisconnect(client_id:string){
+        function handleDisconnect(client_id:any){
             deleteStream(client_id);
+                console.log("yes i did enter here first")
+                console.log(" closed cilent ",client_id)
+            if(!remoteStreams[highlightedKey]){
+                console.log("yes i did enter here")
+                setHighlightedKey(myId);
+            }
         }
         
 
-        function handleConnect(client_id:string){
+        function handleConnect(client_id:any){
             console.log("connection request from another device");
                 const call = peer.call(client_id,stream,{
                     metadata:{
@@ -164,7 +164,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
         }
         </div>
         {
-            remoteStreams[highlightedKey] && 
+            remoteStreams[highlightedKey] &&
                 <CustomPlayer muted={highlightedKey===myId} stream={remoteStreams[highlightedKey].stream} className='rounded-lg h-[90%]'/>
         }
       
