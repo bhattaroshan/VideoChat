@@ -145,7 +145,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
                     return <div key={i} className={cn('flex items-center justify-center rounded-lg overflow-hidden h-fit',{
                         'basis-5/12':streamLen===2,
                         'basis-5/6 md:basis-4/6':streamLen===1 || (streamLen===2 && v!=myId),
-                        'basis-5/12 absolute top-4 right-4 h-1/6 border rounded-xl overflow-hidden': streamLen===2 && v===myId,
+                        'basis-5/12 absolute top-4 right-4 h-1/6 w-auto border rounded-xl overflow-hidden': streamLen===2 && v===myId,
                         'basis-1/3':streamLen>2 && streamLen<5,
                         'basis-1/4':streamLen>=5
                     })}>
