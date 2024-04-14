@@ -140,24 +140,26 @@ export default function CustomStream({params}:{params:{idx:string}}){
         }
     }
 
-    return <div className={cn(`flex flex-col items-center justify-center bg-gray-900 h-screen overflow-hidden gap-2`,{
+    return <div className={cn(`flex flex-col items-center justify-center bg-gray-900 h-auto md:h-screen overflow-hidden gap-2`,{
     })}>
         <div className='flex gap-2'>
         {
             remoteStreams && 
             Object.keys(remoteStreams).filter((key)=>key!=highlightedKey).map((v,i)=>{
                 return <div key={i} onClick={()=>handleVideoClick(v)}>
-                            <CustomPlayer key={i} muted={v===myId} stream={remoteStreams[v].stream} className='h-44 rounded-lg' />
+                            <CustomPlayer key={i} muted={v===myId} stream={remoteStreams[v].stream} className='h-40 rounded-lg' />
                         </div>
             })
         }
         </div>
-        <div className='flex flex-col lg:flex-row gap-16 w-screen h-screen items-center justify-center'>
+        <div className={cn('flex flex-col lg:flex-row gap-16 w-screen h-screen justify-center items-center',{
+            'justify-start md:justify-center':streamingReady
+        })}>
             {
                 remoteStreams[highlightedKey] &&
                     <CustomPlayer muted={highlightedKey===myId} stream={remoteStreams[highlightedKey].stream} 
                             className={cn('rounded-lg h-[50%]',{
-                                'h-[90%]':streamingReady
+                                'h-[70%]':streamingReady
                                 })}/>
             }
             {
