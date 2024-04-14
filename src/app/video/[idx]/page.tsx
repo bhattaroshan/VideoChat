@@ -12,8 +12,8 @@ import CustomPlayer from '@/app/components/CustomPlayer';
 import { cn } from '@/app/utils';
 import clsx from 'clsx';
 
-// const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
-const socket = io('http://localhost:9001');
+const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
+// const socket = io('http://localhost:9001');
 
 
 export default function CustomStream({params}:{params:{idx:string}}){
