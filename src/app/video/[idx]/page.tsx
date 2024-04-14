@@ -104,26 +104,20 @@ export default function CustomStream({params}:{params:{idx:string}}){
 
         function handleDisconnect(client_id:any){
             deleteStream(client_id);
-                console.log("yes i did enter here first")
-                console.log(" closed cilent ",client_id)
             if(!remoteStreams[highlightedKey]){
-                console.log("yes i did enter here")
                 setHighlightedKey(myId);
             }
         }
         
 
         function handleConnect(client_id:any){
-            console.log("connection request from another device");
                 const call = peer.call(client_id,stream,{
                     metadata:{
                         "deviceType": /Mobi/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
                     }
                 });
                 if(call){
-                    console.log("The call was positive");
                     call.on('stream',function(otherStream:MediaStream){
-                        console.log("I am inside the call right now");
                         console.log(remoteStreams);
                         updateStreams(client_id,otherStream);
                     })
@@ -168,19 +162,6 @@ export default function CustomStream({params}:{params:{idx:string}}){
                 <CustomPlayer muted={highlightedKey===myId} stream={remoteStreams[highlightedKey].stream} className='rounded-lg h-[90%]'/>
         }
       
-       
-        {/* {
-                Object.keys(remoteStreams).map((v,i)=>{
-                    const {stream:currentStream} = remoteStreams[v];
-                    return <div key={i} className={cn('bg-red-400 h-screen',{
-                            })} 
-                    onClick={()=>handleVideoClick(v)}>
-                        <CustomPlayer muted={v===myId} stream={currentStream} className='w-full h-full' />
-                        </div>
-                })
-
-           
-        } */}
     </div>
 
 }
