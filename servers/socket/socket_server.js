@@ -10,7 +10,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     // origin: 'https://abcvideochat.vercel.app', // Allow requests from this origin
-    origin: 'https://localhost:3000', // Allow requests from this origin
+    origin: ['https://localhost:3000','https://192.168.10.72:3000'], // Allow requests from this origin
     methods: ['GET', 'POST'], // Allow only specified methods
     allowedHeaders: ['Authorization'], // Allow only specified headers
     credentials: true // Allow sending cookies

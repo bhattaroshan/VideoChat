@@ -3,7 +3,7 @@ import { useMediaStream } from '@/app/hooks/useMediaStream';
 import { usePeer } from '@/app/hooks/usePeer';
 import useSocket from '@/app/hooks/useSocket';
 import { log } from 'console';
-import { MediaConnection } from 'peerjs';
+import { AnswerOption, MediaConnection } from 'peerjs';
 import { useEffect, useState } from 'react';
 import ReactPlayer from 'react-player';
 import io from 'socket.io-client';
@@ -12,8 +12,8 @@ import CustomPlayer from '@/app/components/CustomPlayer';
 import { cn } from '@/app/utils';
 import clsx from 'clsx';
 
-const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
-// const socket = io('http://localhost:9001');
+// const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
+const socket = io('http://localhost:9001');
 
 
 export default function CustomStream({params}:{params:{idx:string}}){
@@ -82,7 +82,8 @@ export default function CustomStream({params}:{params:{idx:string}}){
         if(!peer || !stream) return;
         peer.on('call', async (call:MediaConnection)=>{
             console.log("Got a call from ",call.peer);
-            call.answer(stream);
+            call.answer(stream,);
+            
             call.on('stream', function(otherStream) {
                 // console.log("MY METADATA", call.metadata.deviceType);
                 updateStreams(call.peer,otherStream,call.metadata.deviceType);
@@ -141,7 +142,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
             (
                 Object.keys(remoteStreams).map((v,i)=>{
                     const {stream:currentStream,deviceType} = remoteStreams[v];
-                    return <div key={i} className={cn('flex items-center justify-center',{
+                    return <div key={i} className={cn('flex items-center justify-center h-screen',{
                         // 'basis-5/12':streamLen===2,
                         'basis-full':streamLen===1 || (streamLen===2 && v!=myId),
                         'basis-5/12 absolute top-4 right-4 w-1/3 md:w-1/5 lg:w-1/6 border rounded-xl overflow-hidden': streamLen===2 && v===myId,
@@ -149,7 +150,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
                         'basis-1/4':streamLen>=5
                     })}>
                         <CustomPlayer muted={v===myId} stream={currentStream} className={cn({
-                            'h-auto w-full': deviceType!=='mobile',
+                            'h-[90%] w-auto': deviceType!=='mobile',
                             'h-full w-auto': deviceType==='mobile',
                             // 'w-auto h-full':isMobileResolution(currentStream,v),
                             // 'w-full h-auto':!isMobileResolution(currentStream,v)
