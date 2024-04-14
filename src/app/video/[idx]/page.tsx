@@ -134,7 +134,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
        } 
     },[socket,stream,peer])
 
-    return <div className={cn(`flex flex-wrap h-screen bg-gray-900 overflow-hidden w-screen min-h-screen gap-x-4 p-2 items-center justify-center`,{
+    return <div className={cn(`flex flex-wrap h-screen bg-gray-900 overflow-hidden w-screen min-h-screen gap-x-4 items-center justify-center`,{
     })}>
        
         {
@@ -142,16 +142,16 @@ export default function CustomStream({params}:{params:{idx:string}}){
             (
                 Object.keys(remoteStreams).map((v,i)=>{
                     const {stream:currentStream,deviceType} = remoteStreams[v];
-                    return <div key={i} className={cn('flex items-center justify-center h-screen',{
-                        // 'basis-5/12':streamLen===2,
-                        'basis-full':streamLen===1 || (streamLen===2 && v!=myId),
-                        'basis-5/12 absolute top-4 right-4 w-1/3 md:w-1/5 lg:w-1/6 border rounded-xl overflow-hidden': streamLen===2 && v===myId,
+                    return <div key={i} className={cn('flex items-center justify-center rounded-lg overflow-hidden h-fit',{
+                        'basis-5/12':streamLen===2,
+                        'basis-5/6 md:basis-4/6':streamLen===1 || (streamLen===2 && v!=myId),
+                        'basis-5/12 absolute top-4 right-4 h-1/6 border rounded-xl overflow-hidden': streamLen===2 && v===myId,
                         'basis-1/3':streamLen>2 && streamLen<5,
                         'basis-1/4':streamLen>=5
                     })}>
-                        <CustomPlayer muted={v===myId} stream={currentStream} className={cn({
-                            'h-[90%] w-auto': deviceType!=='mobile',
-                            'h-full w-auto': deviceType==='mobile',
+                        <CustomPlayer muted={v===myId} stream={currentStream} className={cn('w-full h-full',{
+                            // 'h-[90%] w-full': deviceType!=='mobile',
+                            // 'h-full w-auto': deviceType==='mobile',
                             // 'w-auto h-full':isMobileResolution(currentStream,v),
                             // 'w-full h-auto':!isMobileResolution(currentStream,v)
                         })}/>
