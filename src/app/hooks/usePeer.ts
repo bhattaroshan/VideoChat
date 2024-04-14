@@ -5,7 +5,6 @@ import {v4 as uuidv4} from 'uuid'
 
 
 export const usePeer = (onOpenCallback:(id:string)=>void)=>{
-    console.log("I am from inside usePeer");
     const [peer,setPeer] = useState<any>(null);
     const [myId,setMyId] = useState(uuidv4().slice(-12));
     const isPeerSet = useRef(false);
