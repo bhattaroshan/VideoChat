@@ -26,11 +26,11 @@ export default function CustomStream({params}:{params:{idx:string}}){
     console.log(streamLen);
 
     const [highlightedKey, setHighlightedKey] = useState(myId);
-    const remoteCopy = cloneDeep(remoteStreams);
-    const highlightedPlayer = remoteCopy[highlightedKey];
-    console.log(highlightedPlayer);
-    delete remoteCopy[highlightedKey];
-    const nonHighlightedPlayer = remoteCopy;
+    // const remoteCopy = cloneDeep(remoteStreams);
+    // const highlightedPlayer = remoteCopy[highlightedKey];
+    // console.log(highlightedPlayer);
+    // delete remoteCopy[highlightedKey];
+    // const nonHighlightedPlayer = remoteCopy;
 
 
     function updateStreams(client_id:string,currentStream:MediaStream,deviceType='unknown'){
@@ -155,17 +155,17 @@ export default function CustomStream({params}:{params:{idx:string}}){
     })}>
         <div className='flex gap-2'>
         {
-            nonHighlightedPlayer && 
-            Object.keys(nonHighlightedPlayer).map((v:any,i:any)=>{
+            remoteStreams && 
+            Object.keys(remoteStreams).filter((key)=>key!=highlightedKey).map((v,i)=>{
                 return <div key={i} onClick={()=>handleVideoClick(v)}>
-                            <CustomPlayer key={i} muted={v===myId} stream={nonHighlightedPlayer[v].stream} className='h-44 rounded-lg' />
+                            <CustomPlayer key={i} muted={v===myId} stream={remoteStreams[v].stream} className='h-44 rounded-lg' />
                         </div>
             })
         }
         </div>
         {
-            highlightedPlayer && 
-                <CustomPlayer muted={highlightedKey===myId} stream={highlightedPlayer.stream} className='rounded-lg h-[90%]'/>
+            remoteStreams[highlightedKey] && 
+                <CustomPlayer muted={highlightedKey===myId} stream={remoteStreams[highlightedKey].stream} className='rounded-lg h-[90%]'/>
         }
       
        
