@@ -12,8 +12,8 @@ import CustomPlayer from '@/app/components/CustomPlayer';
 import { cn } from '@/app/utils';
 import clsx from 'clsx';
 
-const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
-// const socket = io('http://localhost:9001');
+// const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
+const socket = io('http://localhost:9001');
 
 
 export default function CustomStream({params}:{params:{idx:string}}){
@@ -22,7 +22,10 @@ export default function CustomStream({params}:{params:{idx:string}}){
     const {peer,myId} = usePeer(onOpenCallback);
     const {stream} = useMediaStream();
     const [remoteStreams,setRemoteStreams] = useState<Record<string,any>>({});
-    const streamLen = Object.keys(remoteStreams).length;
+    const [streamingReady,setStreamingReady] = useState(false);
+    const [connectedClients,setConnectedClients] = useState(0);
+
+    // const streamLen = Object.keys(remoteStreams).length;
 
     const [highlightedKey, setHighlightedKey] = useState(myId);
 
@@ -44,31 +47,9 @@ export default function CustomStream({params}:{params:{idx:string}}){
     function onOpenCallback(id:string){
         console.log("MY ID ",id);
         if(socket){
-            socket.emit('client:connect_request',room_id,myId)
+            socket.emit("client:count",room_id);
         }
     }
-
-        // Check the resolution and aspect ratio
-        
-
-    // useEffect(() => {
-    //     // Function to handle the beforeunload event
-    //     const handleBeforeUnload = (event:any) => {
-    //         socket.emit('client:disconnect', room_id, myId); // Send a disconnection message to the server
-    
-    //         if (peer) {
-    //             peer.disconnect(); // Disconnect the peer
-    //         }
-    //         // event.preventDefault();
-    //         // event.returnValue = ''; // This can trigger a confirmation prompt in some browsers
-    //     };
-    
-    //     window.addEventListener('beforeunload', handleBeforeUnload);
-    
-    //     return () => {
-    //         window.removeEventListener('beforeunload', handleBeforeUnload);
-    //     };
-    // }, [socket, peer, myId]);
 
 
     useEffect(()=>{
@@ -127,14 +108,21 @@ export default function CustomStream({params}:{params:{idx:string}}){
                     })
                 }
             }
+        
+        function handleClientCount(counts:any){
+            console.log("I got a count request ",counts);
+            setConnectedClients(counts);
+        }
 
         socket.on('client:connect', handleConnect);
         socket.on('client:disconnect', handleDisconnect);
+        socket.on('client:count',handleClientCount);
         // socket.on('client:disconnect', handleDisconnect);
 
        return ()=>{
         socket.off('client:connect',handleConnect)
         socket.off('client:disconnect',handleDisconnect)
+        socket.off('client:count',handleClientCount)
         // socket.off('client:disconnect',handleDisconnect)
        } 
     },[socket,stream,peer])
@@ -143,6 +131,13 @@ export default function CustomStream({params}:{params:{idx:string}}){
         // setHighlightedPlayer(key);
         console.log('hello there')
         setHighlightedKey(key);
+    }
+
+    function handleJoinVideo(){
+        setStreamingReady(true);
+        if(socket){
+            socket.emit('client:connect_request',room_id,myId);
+        }
     }
 
     return <div className={cn(`flex flex-col items-center justify-center bg-gray-900 h-screen overflow-hidden gap-2`,{
@@ -157,10 +152,34 @@ export default function CustomStream({params}:{params:{idx:string}}){
             })
         }
         </div>
-        {
-            remoteStreams[highlightedKey] &&
-                <CustomPlayer muted={highlightedKey===myId} stream={remoteStreams[highlightedKey].stream} className='rounded-lg h-[90%]'/>
-        }
+        <div className='flex flex-col lg:flex-row gap-16 w-screen h-screen items-center justify-center'>
+            {
+                remoteStreams[highlightedKey] &&
+                    <CustomPlayer muted={highlightedKey===myId} stream={remoteStreams[highlightedKey].stream} 
+                            className={cn('rounded-lg h-[50%]',{
+                                'h-[90%]':streamingReady
+                                })}/>
+            }
+            {
+                !streamingReady &&
+                (
+                    <div className='flex flex-col gap-4 items-center h-[400px] justify-start md:justify-center'>
+                        <div className='flex flex-col items-center gap-2'>
+                            <p className='text-4xl text-gray-200'>Ready to join?</p>
+                            <p className='text-sm text-gray-200 font-thin'>
+                                {
+                                    connectedClients===0 ? 'No one is on the meeting':
+                                    connectedClients===1? 'One person is on the meeting':
+                                    connectedClients+' people are on the meeting'
+                                }
+                            </p>
+                        </div>
+                        <button className='my-4 bg-white text-xl p-4 h-14 w-28 rounded-xl hover:bg-gray-200 font-semibold'
+                            onClick={handleJoinVideo}>Join</button>
+                    </div>
+                )
+            }
+        </div>
       
     </div>
 

@@ -20,19 +20,21 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
 
   socket.on('client:connect_request',(room_id,client_id)=>{
-    console.log('got a connection request from ',client_id,' in room ',room_id);
     socket.join(room_id);
-
     socket.broadcast.to(room_id).emit("client:connect",client_id);
-
     socket.on('disconnect',()=>{
+      const totalClientsInRoom = io.sockets.adapter.rooms.get(room_id)?.size || 0;
       socket.broadcast.to(room_id).emit("client:disconnect",client_id);
+      socket.broadcast.to(room_id).emit("client:count",totalClientsInRoom);
       })
 
     })
   
     
-
+    socket.on('client:count',(room_id)=>{
+      const totalClientsInRoom = io.sockets.adapter.rooms.get(room_id)?.size || 0;
+      socket.emit("client:count",totalClientsInRoom);
+    })
   
   socket.on('disconnect',()=>{
     
