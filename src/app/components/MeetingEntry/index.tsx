@@ -9,9 +9,10 @@ export default function MeetingEntry({connectedClients,onClick,stream,muted}:
                     {connectedClients:number,onClick:()=>void,stream:MediaStream,muted:boolean}){
 
     return  <div className='flex flex-col md:flex-row gap-4 justify-center items-center w-screen h-screen'>
-                <div className='relative flex w-screen h-screen justify-center items-center'>
+            <div className='flex flex-col lg:flex-row items-center justify-center gap-8'>
+                <div className='relative flex items-center'>
                     <CustomPlayer muted={muted} stream={stream} 
-                                className={cn('rounded-lg h-[50%]',{
+                                className={cn('rounded-lg h-[90%]',{
                                     'h-[400px] w-[500px] border':!stream
                                 })}/>
                     {
@@ -21,7 +22,7 @@ export default function MeetingEntry({connectedClients,onClick,stream,muted}:
                         </div>
                     }
                 </div>
-                <div className='flex flex-col gap-4 items-center w-screen h-[400px] justify-start md:justify-center'>
+                <div className='flex flex-col justify-center items-center'>
                     <div className='flex flex-col items-center gap-2'>
                         <p className='text-4xl text-gray-200'>Ready to join?</p>
                         <p className='text-sm text-gray-200 font-thin'>
@@ -34,6 +35,7 @@ export default function MeetingEntry({connectedClients,onClick,stream,muted}:
                     </div>
                     <button className='my-4 bg-white text-xl p-4 h-14 w-28 rounded-xl hover:bg-gray-200 font-semibold'
                         onClick={onClick}>Join</button>
+                </div>
                 </div>
             </div>
 }
