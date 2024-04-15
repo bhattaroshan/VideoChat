@@ -11,6 +11,7 @@ import {cloneDeep, update} from 'lodash';
 import CustomPlayer from '@/app/components/CustomPlayer';
 import { cn } from '@/app/utils';
 import clsx from 'clsx';
+import MeetingEntry from '@/app/components/MeetingEntry';
 
 const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
 // const socket = io('http://localhost:9001');
@@ -30,9 +31,9 @@ export default function CustomStream({params}:{params:{idx:string}}){
     const [highlightedKey, setHighlightedKey] = useState(myId);
 
 
-    function updateStreams(client_id:string,currentStream:MediaStream,deviceType='unknown'){
+    function updateStreams(client_id:string,currentStream:MediaStream,muted:boolean){
         setRemoteStreams((prevStreams) => (
-            {...prevStreams,[client_id]:{stream:currentStream,deviceType:deviceType}}
+            {...prevStreams,[client_id]:{stream:currentStream,muted:muted}}
         ));
     }
 
@@ -56,7 +57,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
         if(!stream || !myId) return;
 
         setRemoteStreams((prevStreams) => (
-            {...prevStreams,[myId]:{stream:stream}}
+            {...prevStreams,[myId]:{stream:stream,muted:true}}
         ));
     },[stream,myId])
     
@@ -69,7 +70,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
             call.on('stream', function(otherStream) {
                 console.log("I am going in here okay")
                 // console.log("MY METADATA", call.metadata.deviceType);
-                updateStreams(call.peer,otherStream,call.metadata.deviceType);
+                updateStreams(call.peer,otherStream,false);
             })
 
             call.on('close',()=>{
@@ -93,14 +94,14 @@ export default function CustomStream({params}:{params:{idx:string}}){
 
         function handleConnect(client_id:any){
                 const call = peer.call(client_id,stream,{
-                    metadata:{
-                        "deviceType": /Mobi/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
-                    }
+                    // metadata:{
+                    //     "deviceType": /Mobi/i.test(navigator.userAgent) ? 'mobile' : 'desktop'
+                    // }
                 });
                 if(call){
                     call.on('stream',function(otherStream:MediaStream){
                         console.log(remoteStreams);
-                        updateStreams(client_id,otherStream);
+                        updateStreams(client_id,otherStream,false);
                     })
 
                     call.on('close',()=>{
@@ -140,49 +141,34 @@ export default function CustomStream({params}:{params:{idx:string}}){
         }
     }
 
-    return <div className={cn(`flex flex-col items-center justify-center bg-gray-900 h-auto md:h-screen overflow-hidden gap-2`,{
-    })}>
-        <div className='flex gap-2'>
+    return <div className='bg-gray-900'>
         {
-            remoteStreams && 
-            Object.keys(remoteStreams).filter((key)=>key!=highlightedKey).map((v,i)=>{
-                return <div key={i} onClick={()=>handleVideoClick(v)}>
-                            <CustomPlayer key={i} muted={v===myId} stream={remoteStreams[v].stream} className='h-40 rounded-lg' />
-                        </div>
-            })
+        remoteStreams[highlightedKey] && streamingReady &&
+            <div className={cn(`flex flex-col items-center justify-center h-screen overflow-hidden gap-2`)}>
+                <div className='flex gap-2'>
+                    {
+                        remoteStreams && 
+                        Object.keys(remoteStreams).filter((key)=>key!=highlightedKey).map((v,i)=>{
+                            return <div key={i} onClick={()=>handleVideoClick(v)}>
+                                        <CustomPlayer key={i} muted={remoteStreams[v].muted} stream={remoteStreams[v].stream} className='h-40 rounded-lg' />
+                                    </div>
+                        })
+                    }
+                </div>
+                
+                <CustomPlayer muted={remoteStreams[highlightedKey].muted} stream={remoteStreams[highlightedKey].stream} 
+                        className={cn('rounded-lg h-[70%]')}/>
+            </div>
         }
-        </div>
-        <div className={cn('flex flex-col lg:flex-row gap-16 w-screen h-screen justify-center items-center',{
-            'justify-start md:justify-center':streamingReady
-        })}>
-            {
-                remoteStreams[highlightedKey] &&
-                    <CustomPlayer muted={highlightedKey===myId} stream={remoteStreams[highlightedKey].stream} 
-                            className={cn('rounded-lg h-[50%]',{
-                                'h-[70%]':streamingReady
-                                })}/>
-            }
-            {
-                !streamingReady &&
-                (
-                    <div className='flex flex-col gap-4 items-center h-[400px] justify-start md:justify-center'>
-                        <div className='flex flex-col items-center gap-2'>
-                            <p className='text-4xl text-gray-200'>Ready to join?</p>
-                            <p className='text-sm text-gray-200 font-thin'>
-                                {
-                                    connectedClients===0 ? 'No one is on the meeting':
-                                    connectedClients===1? 'One person is on the meeting':
-                                    connectedClients+' people are on the meeting'
-                                }
-                            </p>
-                        </div>
-                        <button className='my-4 bg-white text-xl p-4 h-14 w-28 rounded-xl hover:bg-gray-200 font-semibold'
-                            onClick={handleJoinVideo}>Join</button>
-                    </div>
-                )
-            }
-        </div>
-      
+
+        { //meeting entry room
+            !streamingReady &&
+            (
+                <MeetingEntry connectedClients={connectedClients} onClick={handleJoinVideo} 
+                    stream={remoteStreams[highlightedKey]?.stream} muted={true}/>
+            )
+        }
+    
     </div>
 
 }

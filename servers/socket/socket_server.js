@@ -18,7 +18,7 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-
+  
   socket.on('client:connect_request',(room_id,client_id)=>{
     socket.join(room_id);
     socket.broadcast.to(room_id).emit("client:connect",client_id);
