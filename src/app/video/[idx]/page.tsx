@@ -59,6 +59,25 @@ export default function CustomStream({params}:{params:{idx:string}}){
         setRemoteStreams((prevStreams) => (
             {...prevStreams,[myId]:{stream:stream,muted:true}}
         ));
+
+        // setRemoteStreams((prevStreams) => (
+        //             {...prevStreams,['123']:{stream:stream,muted:true}}
+        //         ));
+        // setRemoteStreams((prevStreams) => (
+        //             {...prevStreams,['234']:{stream:stream,muted:true}}
+        //         ));
+        // setRemoteStreams((prevStreams) => (
+        //             {...prevStreams,['345']:{stream:stream,muted:true}}
+        //         ));
+        // setRemoteStreams((prevStreams) => (
+        //             {...prevStreams,['456']:{stream:stream,muted:true}}
+        //         ));
+        // setRemoteStreams((prevStreams) => (
+        //             {...prevStreams,['567']:{stream:stream,muted:true}}
+        //         ));
+        // setRemoteStreams((prevStreams) => (
+        //             {...prevStreams,['678']:{stream:stream,muted:true}}
+        //         ));
     },[stream,myId])
     
 
@@ -110,9 +129,11 @@ export default function CustomStream({params}:{params:{idx:string}}){
                 }
             }
         
-        function handleClientCount(counts:any){
+        function handleClientCount(curr_room_id:any,counts:any){
             console.log("I got a count request ",counts);
-            setConnectedClients(counts);
+            if(curr_room_id===room_id){
+                setConnectedClients(counts);
+            }
         }
 
         socket.on('client:connect', handleConnect);
@@ -141,23 +162,27 @@ export default function CustomStream({params}:{params:{idx:string}}){
         }
     }
 
-    return <div className='bg-gray-900'>
+    return <div className='bg-gray-900 h-screen w-screen items-center justify-center flex overflow-hidden'>
         {
         remoteStreams[highlightedKey] && streamingReady &&
-            <div className={cn(`flex flex-col items-center justify-center h-screen overflow-hidden gap-2`)}>
-                <div className='flex gap-2'>
+            <div className={cn(`flex flex-col sm:flex-row gap-4 bg-gray-800 p-2 rounded-lg h-[100%] sm:h-[40%] md:h-[50%] lg:h-[70%]`)}>
+
+                <CustomPlayer muted={remoteStreams[highlightedKey].muted} stream={remoteStreams[highlightedKey].stream} 
+                        className="rounded-lg"/>
+
+                <div className='flex flex-col gap-2 items-start overflow-y-auto'>
                     {
                         remoteStreams && 
                         Object.keys(remoteStreams).filter((key)=>key!=highlightedKey).map((v,i)=>{
                             return <div key={i} onClick={()=>handleVideoClick(v)}>
-                                        <CustomPlayer key={i} muted={remoteStreams[v].muted} stream={remoteStreams[v].stream} className='h-40 rounded-lg' />
+                                        <CustomPlayer key={i} muted={remoteStreams[v].muted} stream={remoteStreams[v].stream} 
+                                            className='rounded-lg min-w-[10.64rem] max-h-[8rem] lg:min-w-[13.3rem] lg:max-h-[10rem]' />
                                     </div>
                         })
                     }
                 </div>
                 
-                <CustomPlayer muted={remoteStreams[highlightedKey].muted} stream={remoteStreams[highlightedKey].stream} 
-                        className={cn('rounded-lg h-[70%]')}/>
+                
             </div>
         }
 

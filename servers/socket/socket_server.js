@@ -18,14 +18,17 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-  
+
   socket.on('client:connect_request',(room_id,client_id)=>{
     socket.join(room_id);
+    const totalClientsInRoom = io.sockets.adapter.rooms.get(room_id)?.size || 0;
     socket.broadcast.to(room_id).emit("client:connect",client_id);
+    io.emit("client:count",room_id,totalClientsInRoom); //broadcast to everyone
+
     socket.on('disconnect',()=>{
       const totalClientsInRoom = io.sockets.adapter.rooms.get(room_id)?.size || 0;
       socket.broadcast.to(room_id).emit("client:disconnect",client_id);
-      socket.broadcast.to(room_id).emit("client:count",totalClientsInRoom);
+      io.emit("client:count",room_id,totalClientsInRoom); //broadcast to everyone
       })
 
     })
@@ -33,7 +36,7 @@ io.on('connection', (socket) => {
     
     socket.on('client:count',(room_id)=>{
       const totalClientsInRoom = io.sockets.adapter.rooms.get(room_id)?.size || 0;
-      socket.emit("client:count",totalClientsInRoom);
+      socket.emit("client:count",room_id,totalClientsInRoom);
     })
   
   socket.on('disconnect',()=>{

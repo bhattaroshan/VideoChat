@@ -24,8 +24,8 @@ export default function CustomPlayer({stream,className,user, muted=true}:
     }
 
     return <video ref={videoRef} muted={muted} autoPlay playsInline={true} className={cn('object-contain cursor-pointer',className,{
-        'border-2 border-yellow-400':highlight,
-        // 'border-2 border-gray-400 box-border':!highlight,
+        'border border-yellow-400':highlight,
+        'border border-gray-400':!highlight,
     })} 
         onMouseOver={handleMouseOver} onMouseLeave={handleMouseLeave}/>
 }
