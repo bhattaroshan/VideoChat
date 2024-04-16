@@ -47,11 +47,13 @@ export default function CustomStream({params}:{params:{idx:string}}){
 
     function onOpenCallback(id:string){
         console.log("MY ID ",id);
-        if(socket){
-            socket.emit("client:count",room_id);
-        }
     }
 
+    useEffect(()=>{
+        if(!socket) return;
+        socket.emit("client:count",room_id);
+
+    },[socket])
 
     useEffect(()=>{
         if(!stream || !myId) return;
