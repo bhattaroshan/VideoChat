@@ -21,10 +21,23 @@ export const usePeer = (onOpenCallback:(id:string)=>void)=>{
                 port: 443,
                 path: "/myapp",
                 secure: true,
+                config: {
+                    iceServers: [
+                        {
+                            urls: 'stun:stun.roshanbhatta.com.np' // STUN server
+                        },
+                        {
+                            urls: 'turn:turn.roshanbhatta.com.np', // TURN server
+                            username: 'guest', // TURN server username (if required)
+                            credential: 'somepassword' // TURN server password (if required)
+                        }
+                    ]
+                }
             };
 
             mypeer = new peerJS.default(myId,peerConfig);
             setPeer(mypeer);
+
 
             mypeer.on('open',async (id:string)=>{
                 if (onOpenCallback && typeof onOpenCallback === 'function') {
