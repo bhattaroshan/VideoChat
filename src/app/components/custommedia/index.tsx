@@ -1,15 +1,15 @@
 'use client'
-import CameraIcon from "@/icons/camera";
-import MicIcon from "@/icons/mic";
-import NoCameraIcon from "@/icons/nocamera";
-import NoMicIcon from "@/icons/nomic";
+import CameraIcon from "@/app/icons/camera";
+import MicIcon from "@/app/icons/mic";
+import NoCameraIcon from "@/app/icons/nocamera";
+import NoMicIcon from "@/app/icons/nomic";
 import { MouseEventHandler, useEffect, useRef, useState } from "react"
 // import Peer from "peerjs";
 import {v4 as uuidv4} from 'uuid';
-import RecordPlay from "../record";
+import RecordPlay from '@/app/icons/record';
 import ReactPlayer from "react-player";
-import HangUpIcon from "@/icons/hangup";
-import RecordIcon from "@/icons/record";
+import HangUpIcon from "@/app/icons/hangup";
+import RecordIcon from "@/app/icons/record";
 // import io from 'socket.io-client';
 
 // const socket = io('https://crosshimalaya.roshanbhatta.com.np/myapp:443');

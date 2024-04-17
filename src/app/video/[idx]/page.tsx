@@ -12,12 +12,15 @@ import CustomPlayer from '@/app/components/CustomPlayer';
 import { cn } from '@/app/utils';
 import clsx from 'clsx';
 import MeetingEntry from '@/app/components/MeetingEntry';
+import HangUpIcon from '@/app/icons/hangup';
+import { useRouter } from 'next/navigation';
 
 const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
 // const socket = io('http://localhost:9001');
 
 
 export default function CustomStream({params}:{params:{idx:string}}){
+    const router = useRouter();
     const room_id = params.idx;
 
     const {peer,myId} = usePeer(onOpenCallback);
@@ -164,10 +167,25 @@ export default function CustomStream({params}:{params:{idx:string}}){
         }
     }
 
-    return <div className='bg-gray-900 h-screen w-screen items-center justify-center flex overflow-hidden'>
+    function handleEndCall(){
+        if (peer) {
+            // Close all active connections
+            // peer.connections.forEach((connection: any) => {
+                // connection.close();
+            // });
+            peer.disconnect();
+            peer.destroy();
+            router.push('/');
+        }
+    }
+
+    return <div className='bg-gray-900 '>
         {
         remoteStreams[highlightedKey] && streamingReady &&
-            <div className={cn(`flex flex-col sm:flex-row gap-4 bg-gray-800 p-2 rounded-lg h-[100%] sm:h-[40%] md:h-[50%] lg:h-[70%]`)}>
+        <div className='relative h-screen w-screen items-center justify-center flex overflow-hidden'>
+            <div className={cn(`flex flex-col sm:flex-row bg-gray-800 p-2 rounded-lg h-[100%] sm:h-[40%] md:h-[50%] lg:h-[70%]`,{
+                'gap-2':Object.keys(remoteStreams).length>1
+            })}>
 
                 <CustomPlayer muted={remoteStreams[highlightedKey].muted} stream={remoteStreams[highlightedKey].stream} 
                         className="rounded-lg"/>
@@ -186,6 +204,12 @@ export default function CustomStream({params}:{params:{idx:string}}){
                 
                 
             </div>
+            <div className='absolute bottom-8 left-1/2 -translate-x-1/2 w-fit h-fit p-4 
+                rounded-full border bg-red-400 border-red-500 cursor-pointer
+                hover:bg-red-300 active:bg-red-500 group' onClick={handleEndCall}>
+                <HangUpIcon className='bottom-4 w-4 h-4 text-blue-100 group-hover:text-white'/>
+            </div>
+        </div>
         }
 
         { //meeting entry room
@@ -195,6 +219,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
                     stream={remoteStreams[highlightedKey]?.stream} muted={true}/>
             )
         }
+         
     
     </div>
 
