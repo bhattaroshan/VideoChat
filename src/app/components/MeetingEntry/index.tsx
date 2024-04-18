@@ -4,23 +4,47 @@
 import { cn } from "@/app/utils"
 import CustomPlayer from "../CustomPlayer"
 import LoadIcon from "@/app/icons/load"
+import CameraIcon from "@/app/icons/camera"
+import MicIcon from "@/app/icons/mic"
+import HangUpIcon from "@/app/icons/hangup"
 
 export default function MeetingEntry({connectedClients,onClick,stream,muted}:
                     {connectedClients:number,onClick:()=>void,stream:MediaStream,muted:boolean}){
+    
+    return (  
+    // <div className='flex flex-col md:flex-row gap-4 justify-center items-center w-screen h-screen'>
+            // <div className='flex flex-col lg:flex-row items-center justify-center gap-2 md:gap-8'>
+            <div className='flex flex-col lg:flex-row items-center justify-center gap-2 md:gap-8 w-screen h-screen'>
+                <div className='flex flex-col items-center gap- gap-4 '>
 
-    return  <div className='flex flex-col md:flex-row gap-4 justify-center items-center w-screen h-screen'>
-            <div className='flex flex-col lg:flex-row items-center justify-center gap-8'>
                 <div className='relative flex items-center justify-center'>
                     <CustomPlayer muted={muted} stream={stream} 
                                 className={cn('rounded-lg h-[90%]',{
-                                    'h-[400px] w-[500px] border':!stream
+                                    'h-[300px] w-[90%] border':!stream
                                 })}/>
                     {
                         !stream &&
-                        <div className='animate-spin absolute left-1/2 top-1/2 z-[1000]'>
-                            <LoadIcon className='text-white w-10 h-10 '/>
+                        <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[1000]'>
+                            <LoadIcon className='text-white w-10 h-10 animate-spin'/>
                         </div>
                     }
+                </div>
+                <div className='flex gap-4'>
+                    <div className='p-4 rounded-lg border bg-blue-400 border-blue-500 cursor-pointer
+                            hover:bg-blue-300 group'>
+                        <CameraIcon className='bottom-4 w-5 h-5 text-blue-100 group-hover:text-white'/>
+                    </div>
+                    <div className='w-fit h-fit p-4 
+                                rounded-lg border bg-blue-400 border-blue-500 cursor-pointer
+                            hover:bg-blue-300 group'>
+                        <MicIcon className='bottom-4 w-5 h-5 text-blue-100 group-hover:text-white'/>
+                    </div>
+                    <div className=' w-fit h-fit p-4 
+                        rounded-lg border bg-red-400 border-red-500 cursor-pointer
+                        hover:bg-red-300 active:bg-red-500 group'>
+                        <HangUpIcon className='text-white bottom-4 w-5 h-5 group-hover:text-white'/>
+                    </div>
+                    </div>
                 </div>
                 <div className='flex flex-col justify-center items-center'>
                     <div className='flex flex-col items-center gap-2'>
@@ -37,5 +61,5 @@ export default function MeetingEntry({connectedClients,onClick,stream,muted}:
                         onClick={onClick}>Join</button>
                 </div>
                 </div>
-            </div>
+    )
 }

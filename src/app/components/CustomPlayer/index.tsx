@@ -1,11 +1,12 @@
 'use client'
+import useIsAudioActive from "@/app/hooks/useAudioActive";
 import { cn } from "@/app/utils";
 import { useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 
 export default function CustomPlayer({stream,className,user, muted=true}:
                 {stream:MediaStream,className?:string,user?:string,muted?:boolean}){
-    
+                    
     const videoRef = useRef<HTMLVideoElement|null>(null);
     const [highlight,setHighlight] = useState(false);
     
@@ -24,10 +25,11 @@ export default function CustomPlayer({stream,className,user, muted=true}:
     }
 
     return <video ref={videoRef} muted={muted} autoPlay playsInline={true} className={cn('object-contain cursor-pointer',className,{
-        'border border-yellow-400':highlight,
-        'border border-gray-400':!highlight,
-    })} 
-        onMouseOver={handleMouseOver} onMouseLeave={handleMouseLeave}/>
+                'border-2 border-yellow-400':highlight,
+                'border-2 border-gray-400':!highlight,
+                'border-2 border-green-400': useIsAudioActive({source:stream})})} 
+                onMouseOver={handleMouseOver} onMouseLeave={handleMouseLeave}/>
+    
 }
 
 
