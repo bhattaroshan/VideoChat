@@ -56,6 +56,15 @@ export default function CustomStream({params}:{params:{idx:string}}){
     }
 
     useEffect(()=>{
+        if(Object.keys(remoteStreams).length===2){
+            const keys = Object.keys(remoteStreams).filter((key)=>key!=myId);
+            if(keys.length>=1){
+                setHighlightedKey(keys[0]);
+            }
+        }
+    },[remoteStreams])
+
+    useEffect(()=>{
         if(!socket) return;
         socket.emit("client:count",room_id);
 
@@ -134,9 +143,10 @@ export default function CustomStream({params}:{params:{idx:string}}){
                     call.on('close',()=>{
                         deleteStream(client_id);
                     })
-                    if(Object.keys(remoteStreams).length<=1){
-                        setHighlightedKey(client_id);
-                    }
+                    // console.log(Object.keys(remoteStreams).length," is my length")
+                    // if(Object.keys(remoteStreams).length<=1){
+                    //     setHighlightedKey(client_id);
+                    // }
                 }
             }
         
