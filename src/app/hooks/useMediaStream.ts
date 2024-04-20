@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 
 export const useMediaStream = ()=>{
     const [state,setState] = useState<MediaStream|null>(null);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(()=>{
         let stream:MediaStream;
@@ -22,6 +23,7 @@ export const useMediaStream = ()=>{
                 console.log("Error in navigator");
             }
         })();
+        setIsLoading(false);
     return ()=>{
         if(stream){
             stream.getTracks().forEach(track=>track.stop());
@@ -30,6 +32,7 @@ export const useMediaStream = ()=>{
     },[])
 
     return {
-        stream:state
+        stream:state,
+        isLoading: isLoading
     }
 }

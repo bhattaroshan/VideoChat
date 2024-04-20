@@ -36,7 +36,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
 
     const [highlightedKey, setHighlightedKey] = useState(myId);
 
-
+    
     function updateStreams(client_id:string,streamData:any){
         setRemoteStreams((prevStreams) => (
             {...prevStreams,[client_id]:streamData}
@@ -93,7 +93,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
         if(!peer || !stream) return;
         peer.on('call', async (call:MediaConnection)=>{
             console.log("Got a call from ",call.peer);
-            call.answer(stream,);
+            call.answer(stream);
             call.on('stream', function(otherStream) {
                 console.log("I am going in here okay")
                 // console.log("MY METADATA", call.metadata.deviceType);
@@ -134,6 +134,9 @@ export default function CustomStream({params}:{params:{idx:string}}){
                     call.on('close',()=>{
                         deleteStream(client_id);
                     })
+                    if(Object.keys(remoteStreams).length===1){
+                        setHighlightedKey(client_id);
+                    }
                 }
             }
         
@@ -217,64 +220,63 @@ export default function CustomStream({params}:{params:{idx:string}}){
     // }
 
     return <div className='bg-gray-900 '>
-        {
-        remoteStreams[highlightedKey] && streamingReady &&
-        <div className='relative h-screen w-screen items-center justify-center flex overflow-hidden'>
-            <div className={cn(`flex flex-col sm:flex-row bg-gray-800 p-2 rounded-lg h-[100%] sm:h-[40%] md:h-[50%] lg:h-[75%]`,{
-                'gap-2':Object.keys(remoteStreams).length>1
-            })}>
+    {
+    remoteStreams[highlightedKey] && streamingReady &&
+    <div className='relative h-screen w-screen items-center justify-center flex overflow-hidden'>
+        <div className={cn(`flex flex-col sm:flex-row bg-gray-800 p-2 rounded-lg h-[100%] sm:h-[40%] md:h-[50%] lg:h-[75%]`,{
+            'gap-2':Object.keys(remoteStreams).length>1
+        })}>
 
-                <CustomPlayer muted={remoteStreams[highlightedKey].muted} stream={remoteStreams[highlightedKey].stream} 
-                        className="rounded-lg"/>
+            <CustomPlayer muted={remoteStreams[highlightedKey].muted} stream={remoteStreams[highlightedKey].stream} 
+                    className="rounded-lg md:min-w-[520px] lg:min-w-[790px]"/>
 
-                <div className='flex flex-col gap-2 items-start overflow-y-auto'>
-                    {
-                        remoteStreams && 
-                        Object.keys(remoteStreams).filter((key)=>key!=highlightedKey).map((v,i)=>{
-                            return <div key={i} onClick={()=>handleVideoClick(v)}>
-                                        <CustomPlayer key={i} muted={remoteStreams[v].muted} stream={remoteStreams[v].stream} 
-                                            className='rounded-lg min-w-[10.64rem] max-h-[8rem] lg:min-w-[13.3rem] lg:max-h-[10rem]'/>
-                                    </div>
-                        })
-                    }
-                </div>
-                
-                
+            <div className='flex flex-col gap-2 items-start overflow-y-auto'>
+                {
+                    remoteStreams && 
+                    Object.keys(remoteStreams).filter((key)=>key!=highlightedKey).map((v,i)=>{
+                        return <div key={i} onClick={()=>handleVideoClick(v)}>
+                                    <CustomPlayer key={i} muted={remoteStreams[v].muted} stream={remoteStreams[v].stream} 
+                                        className='rounded-lg min-w-[10.64rem] max-h-[8rem] lg:min-w-[13.3rem] lg:max-h-[10rem]'/>
+                                </div>
+                    })
+                }
             </div>
-            <div className='absolute flex gap-4 bottom-8 left-1/2 -translate-x-1/2'>
-                <div className='w-fit h-fit p-4 
-                            rounded-lg border bg-blue-400 border-blue-500 cursor-pointer
-                          hover:bg-blue-300 group'>
-                    <CameraIcon className='bottom-4 w-6 h-6 text-blue-100 group-hover:text-white'/>
-                </div>
-                <div className='w-fit h-fit p-4 
-                            rounded-lg border bg-blue-400 border-blue-500 cursor-pointer
-                          hover:bg-blue-300 group' onClick={handleMicMute}>
-                    {
-                        muteMyMic?
-                        <NoMicIcon className='bottom-4 w-6 h-6 text-blue-100 group-hover:text-white'/>
-                        :
-                        <MicIcon className='bottom-4 w-6 h-6 text-blue-100 group-hover:text-white'/>
-                    }
-                </div>
-                <div className=' w-fit h-fit p-4 
-                    rounded-lg border bg-red-400 border-red-500 cursor-pointer
-                    hover:bg-red-300 active:bg-red-500 group' onClick={handleEndCall}>
-                    <HangUpIcon className='text-white bottom-4 w-6 h-6 group-hover:text-white'/>
-                </div>
+            
+            
+        </div>
+        <div className='absolute flex gap-4 bottom-8 left-1/2 -translate-x-1/2'>
+            <div className='w-fit h-fit p-4 
+                        rounded-lg border bg-blue-400 border-blue-500 cursor-pointer
+                      hover:bg-blue-300 group'>
+                <CameraIcon className='bottom-4 w-6 h-6 text-blue-100 group-hover:text-white'/>
+            </div>
+            <div className='w-fit h-fit p-4 
+                        rounded-lg border bg-blue-400 border-blue-500 cursor-pointer
+                      hover:bg-blue-300 group' onClick={handleMicMute}>
+                {
+                    muteMyMic?
+                    <NoMicIcon className='bottom-4 w-6 h-6 text-blue-100 group-hover:text-white'/>
+                    :
+                    <MicIcon className='bottom-4 w-6 h-6 text-blue-100 group-hover:text-white'/>
+                }
+            </div>
+            <div className=' w-fit h-fit p-4 
+                rounded-lg border bg-red-400 border-red-500 cursor-pointer
+                hover:bg-red-300 active:bg-red-500 group' onClick={handleEndCall}>
+                <HangUpIcon className='text-white bottom-4 w-6 h-6 group-hover:text-white'/>
             </div>
         </div>
-        }
-
-        { //meeting entry room
-            !streamingReady &&
-            (
-                <MeetingEntry connectedClients={connectedClients} onClick={handleJoinVideo} 
-                    stream={remoteStreams[highlightedKey]?.stream} muted={true}/>
-            )
-        }
-         
-    
     </div>
+    }
 
+    { //meeting entry room
+        !streamingReady &&
+        (
+            <MeetingEntry connectedClients={connectedClients} onClick={handleJoinVideo} 
+                stream={remoteStreams[highlightedKey]?.stream} muted={true}/>
+        )
+    }
+     
+
+</div>
 }

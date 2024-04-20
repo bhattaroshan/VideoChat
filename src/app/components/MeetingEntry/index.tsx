@@ -17,18 +17,10 @@ export default function MeetingEntry({connectedClients,onClick,stream,muted}:
             <div className='flex flex-col lg:flex-row items-center justify-center gap-2 md:gap-8 w-screen h-screen'>
                 <div className='flex flex-col items-center gap- gap-4 '>
 
-                <div className='relative flex items-center justify-center'>
                     <CustomPlayer muted={muted} stream={stream} 
-                                className={cn('rounded-lg h-[90%]',{
-                                    'h-[300px] w-[90%] border':!stream
+                                className={cn('rounded-lg h-[400px] md:h-[500px]',{
+                                    'h-[300px] w-[500px]':!stream
                                 })}/>
-                    {
-                        !stream &&
-                        <div className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[1000]'>
-                            <LoadIcon className='text-white w-10 h-10 animate-spin'/>
-                        </div>
-                    }
-                </div>
                 <div className='flex gap-4'>
                     <div className='p-4 rounded-lg border bg-blue-400 border-blue-500 cursor-pointer
                             hover:bg-blue-300 group'>
@@ -42,13 +34,13 @@ export default function MeetingEntry({connectedClients,onClick,stream,muted}:
                     <div className=' w-fit h-fit p-4 
                         rounded-lg border bg-red-400 border-red-500 cursor-pointer
                         hover:bg-red-300 active:bg-red-500 group'>
-                        <HangUpIcon className='text-white bottom-4 w-5 h-5 group-hover:text-white'/>
+                        <HangUpIcon className='text-white bottom-4 w-6 h-6 group-hover:text-white'/>
                     </div>
                     </div>
                 </div>
                 <div className='flex flex-col justify-center items-center'>
                     <div className='flex flex-col items-center gap-2'>
-                        <p className='text-4xl text-gray-200'>Ready to join?</p>
+                        <p className='hidden md:block text-4xl text-gray-200'>Ready to join?</p>
                         <p className='text-sm text-gray-200 font-thin'>
                             {
                                 connectedClients===0 ? 'No one is on the meeting':
