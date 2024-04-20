@@ -134,7 +134,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
                     call.on('close',()=>{
                         deleteStream(client_id);
                     })
-                    if(Object.keys(remoteStreams).length===1){
+                    if(Object.keys(remoteStreams).length<=1){
                         setHighlightedKey(client_id);
                     }
                 }
