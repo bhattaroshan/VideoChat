@@ -308,7 +308,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
                         rounded-lg border bg-blue-400 border-blue-500 cursor-pointer
                       hover:bg-blue-300 group' onClick={handleHandRaise}>
                         {
-                            userFeatures[myId].raise_hand ?
+                            userFeatures[myId]?.raise_hand ?
                                 <HandRaiseSolidIcon className='bottom-4 w-6 h-6 text-yellow-400 group-hover:text-white'/>
                                 :<HandRaiseIcon className='bottom-4 w-6 h-6 text-blue-100 group-hover:text-white'/>
 
