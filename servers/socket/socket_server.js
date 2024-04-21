@@ -25,6 +25,10 @@ io.on('connection', (socket) => {
     socket.broadcast.to(room_id).emit("client:connect",client_id);
     io.emit("client:count",room_id,totalClientsInRoom); //broadcast to everyone
 
+    socket.on("client:raise_hand",(state)=>{
+      socket.broadcast.to(room_id).emit("client:raise_hand",client_id,state);
+    });
+
     socket.on('disconnect',()=>{
       const totalClientsInRoom = io.sockets.adapter.rooms.get(room_id)?.size || 0;
       socket.broadcast.to(room_id).emit("client:disconnect",client_id);
