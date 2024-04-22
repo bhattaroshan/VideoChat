@@ -15,6 +15,7 @@ export default function Home() {
     <div className='w-screen h-screen'>
       <div className='bg-gray-900 w-screen lg:w-1/2 h-screen flex flex-col justify-center px-10 gap-4'>
         <p className='font-bold text-4xl text-white'>Video calls and meetings</p>
+
         <button className='bg-white font-bold text-xl p-4 rounded-lg w-52' onClick={handleMeetingCreate}>Create Meeting</button>
       </div>
     </div>
