@@ -18,9 +18,7 @@ export default function MeetingEntry({connectedClients,onClick,stream,muted}:
                 <div className='flex flex-col items-center gap- gap-4 '>
 
                     <CustomPlayer muted={muted} stream={stream} 
-                                className={cn('rounded-lg h-[400px] md:h-[500px]',{
-                                    'h-[300px] w-[500px]':!stream
-                                })}/>
+                                className={cn('w-[320px] h-[240px] md:w-[427px] md:h-[320px] lg:w-[640px] lg:h-[480px]')}/>
                 <div className='flex gap-4'>
                     <div className='p-4 rounded-lg border bg-blue-400 border-blue-500 cursor-pointer
                             hover:bg-blue-300 group'>

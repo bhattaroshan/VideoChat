@@ -23,6 +23,7 @@ io.on('connection', (socket) => {
     socket.join(room_id);
     const totalClientsInRoom = io.sockets.adapter.rooms.get(room_id)?.size || 0;
     socket.broadcast.to(room_id).emit("client:connect",client_id);
+    console.log("My connected devices ",totalClientsInRoom);
     io.emit("client:count",room_id,totalClientsInRoom); //broadcast to everyone
 
     socket.on("client:raise_hand",(state)=>{
@@ -40,6 +41,7 @@ io.on('connection', (socket) => {
     
     socket.on('client:count',(room_id)=>{
       const totalClientsInRoom = io.sockets.adapter.rooms.get(room_id)?.size || 0;
+      console.log("hello client count request ",totalClientsInRoom)
       socket.emit("client:count",room_id,totalClientsInRoom);
     })
   

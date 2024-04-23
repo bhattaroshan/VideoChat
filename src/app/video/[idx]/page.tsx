@@ -20,8 +20,8 @@ import NoMicIcon from '@/app/icons/nomic';
 import HandRaiseIcon from '@/app/icons/handraise';
 import HandRaiseSolidIcon from '@/app/icons/handraisesolid';
 
-const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
-// const socket = io('http://localhost:9001');
+// const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
+const socket = io('http://localhost:9001');
 
 
 export default function CustomStream({params}:{params:{idx:string}}){
@@ -154,6 +154,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
             }
         
         function handleClientCount(curr_room_id:any,counts:any){
+            console.log("Hello I am here from client count ",curr_room_id,counts)
             if(curr_room_id===room_id){
                 setConnectedClients(counts);
             }
@@ -263,32 +264,29 @@ export default function CustomStream({params}:{params:{idx:string}}){
     //     }
     // }
 
-    return <div className='bg-gray-900 '>
+    return <div className='bg-gray-900 w-screen h-screen'>
     {
     remoteStreams[highlightedKey] && streamingReady &&
-    <div className='relative h-screen w-screen items-center justify-center flex overflow-hidden'>
-        <div className={cn(`flex flex-col sm:flex-row bg-gray-800 p-2 rounded-lg h-[100%] sm:h-[40%] md:h-[50%] lg:h-[75%]`,{
-            'gap-2':Object.keys(remoteStreams).length>1
-        })}>
+    <div className='flex w-screen h-screen justify-center items-center'>
+            <div className={cn(`flex flex-col md:flex-row gap-4 p-4`)}>
+                    <CustomPlayer muted={remoteStreams[highlightedKey].muted} stream={remoteStreams[highlightedKey].stream} userFeature={userFeatures[highlightedKey]}
+                        className='w-[453px] h-[265px] sm:w-[567px] sm:h-[400px] md:w-[453px] md:h-[320px] lg:w-[640px] lg:h-[480px] xl:w-[832px] xl:h-[624px]'/>
 
-            <CustomPlayer muted={remoteStreams[highlightedKey].muted} stream={remoteStreams[highlightedKey].stream} userFeature={userFeatures[highlightedKey]}
-                    className="rounded-lg md:min-w-[520px] lg:min-w-[790px]"/>
-
-            <div className='flex flex-col gap-2 items-start overflow-y-auto'>
-                {
-                    remoteStreams && 
-                    Object.keys(remoteStreams).filter((key)=>key!=highlightedKey).map((v,i)=>{
-                        return <div key={i} onClick={()=>handleVideoClick(v)}>
-                                    <CustomPlayer key={i} muted={remoteStreams[v].muted} stream={remoteStreams[v].stream} userFeature={userFeatures[v]}
-                                        className='rounded-lg min-w-[10.64rem] max-h-[8rem] lg:min-w-[13.3rem] lg:max-h-[10rem]'/>
-                                </div>
-                    })
-                }
+                <div className='flex flex-col gap-4 h-[265px] sm:h-[400px] md:h-[320px] lg:h-[480px] xl:h-[624px] overflow-y-auto'>
+                    {
+                        remoteStreams && 
+                        Object.keys(remoteStreams).filter((key)=>key!=highlightedKey).map((v,i)=>{
+                            return <div key={i} onClick={()=>handleVideoClick(v)}>
+                                        <CustomPlayer key={i} muted={remoteStreams[v].muted} stream={remoteStreams[v].stream} userFeature={userFeatures[v]}
+                                        className='w-[183px] h-[137px] lg:w-[237px] lg:h-[178px]'/>
+                                    </div>
+                        })
+                    }
+                </div>
+                
             </div>
-            
-            
-        </div>
-        <div className='absolute flex gap-4 bottom-8 left-1/2 -translate-x-1/2'>
+        <div className='fixed bottom-0  bg-gray-900 w-screen'>
+        <div className='flex py-4 gap-2 justify-center'>
             <div className='w-fit h-fit p-4 
                         rounded-lg border bg-blue-400 border-blue-500 cursor-pointer
                       hover:bg-blue-300 group'>
@@ -319,6 +317,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
                 hover:bg-red-300 active:bg-red-500 group' onClick={handleEndCall}>
                 <HangUpIcon className='text-white bottom-4 w-6 h-6 group-hover:text-white'/>
             </div>
+        </div>
         </div>
     </div>
     }
