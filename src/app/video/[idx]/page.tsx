@@ -20,8 +20,8 @@ import NoMicIcon from '@/app/icons/nomic';
 import HandRaiseIcon from '@/app/icons/handraise';
 import HandRaiseSolidIcon from '@/app/icons/handraisesolid';
 
-// const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
-const socket = io('http://localhost:9001');
+const socket = io('wss://crosshimalaya.roshanbhatta.com.np');
+// const socket = io('http://localhost:9001');
 
 
 export default function CustomStream({params}:{params:{idx:string}}){
@@ -36,7 +36,6 @@ export default function CustomStream({params}:{params:{idx:string}}){
     const [muteMyMic,setMuteMyMic] = useState(false);
     const [raiseHand,setRaiseHand] = useState(false);
     const [userFeatures,setUserFeature] = useState<Record<string,any>>({});
-    // const streamLen = Object.keys(remoteStreams).length;
 
     const [highlightedKey, setHighlightedKey] = useState(myId);
 
@@ -75,6 +74,19 @@ export default function CustomStream({params}:{params:{idx:string}}){
     useEffect(()=>{
         if(!socket) return;
         socket.emit("client:count",room_id);
+
+        function handleClientCount(curr_room_id:any,counts:any){
+            console.log("Hello I am here from client count ",curr_room_id,counts)
+            if(curr_room_id===room_id){
+                setConnectedClients(counts);
+            }
+        }
+
+        socket.on('client:count',handleClientCount);
+
+        return ()=>{
+            socket.off('client:count',handleClientCount)
+        }
 
     },[socket])
 
@@ -152,13 +164,6 @@ export default function CustomStream({params}:{params:{idx:string}}){
                     // }
                 }
             }
-        
-        function handleClientCount(curr_room_id:any,counts:any){
-            console.log("Hello I am here from client count ",curr_room_id,counts)
-            if(curr_room_id===room_id){
-                setConnectedClients(counts);
-            }
-        }
 
         function handleSocketHandRaise(client_id:any,state:any){
             setUserFeature((prevStreams)=>{
@@ -176,14 +181,12 @@ export default function CustomStream({params}:{params:{idx:string}}){
 
         socket.on('client:connect', handleConnect);
         socket.on('client:disconnect', handleDisconnect);
-        socket.on('client:count',handleClientCount);
         socket.on('client:raise_hand',handleSocketHandRaise);
         // socket.on('client:disconnect', handleDisconnect);
 
        return ()=>{
         socket.off('client:connect',handleConnect)
         socket.off('client:disconnect',handleDisconnect)
-        socket.off('client:count',handleClientCount)
         socket.off('client:raise_hand',handleSocketHandRaise);
         // socket.off('client:disconnect',handleDisconnect)
        } 
@@ -270,7 +273,7 @@ export default function CustomStream({params}:{params:{idx:string}}){
     <div className='flex w-screen h-screen justify-center items-center'>
             <div className={cn(`flex flex-col md:flex-row gap-4 p-4`)}>
                     <CustomPlayer muted={remoteStreams[highlightedKey].muted} stream={remoteStreams[highlightedKey].stream} userFeature={userFeatures[highlightedKey]}
-                        className='w-[453px] h-[265px] sm:w-[567px] sm:h-[400px] md:w-[453px] md:h-[320px] lg:w-[640px] lg:h-[480px] xl:w-[832px] xl:h-[624px]'/>
+                        className='w-[453px] h-[265px] sm:w-[567px] sm:h-[400px] md:w-[453px] md:h-[320px] lg:w-[640px] lg:h-[480px] xl:w-[832px] xl:h-[610px]'/>
 
                 <div className='flex flex-col gap-4 h-[265px] sm:h-[400px] md:h-[320px] lg:h-[480px] xl:h-[624px] overflow-y-auto'>
                     {

@@ -35,16 +35,14 @@ io.on('connection', (socket) => {
       socket.broadcast.to(room_id).emit("client:disconnect",client_id);
       io.emit("client:count",room_id,totalClientsInRoom); //broadcast to everyone
       })
-
     })
   
-    
     socket.on('client:count',(room_id)=>{
       const totalClientsInRoom = io.sockets.adapter.rooms.get(room_id)?.size || 0;
       console.log("hello client count request ",totalClientsInRoom)
-      socket.emit("client:count",room_id,totalClientsInRoom);
+      io.emit("client:count",room_id,totalClientsInRoom);
     })
-  
+
   socket.on('disconnect',()=>{
     
   });
@@ -55,4 +53,3 @@ server.listen(9001,() => {
 console.log('Socket.IO server running on port 9001');
 });
 
-              
